@@ -9,7 +9,7 @@ O percurso principal prioriza **animações e ações**, com poucas legendas cur
 - Invasão em um flashback identificado de aproximadamente 86 segundos, com apresentação da família e planos mais longos, com tropas, moradores procurando abrigo e a saída da família.
 - Transição exclusiva “De volta ao presente”, com um botão Continuar. Nenhum diálogo aparece por cima dela.
 - Exploração para recolher a pasta e buscar água. A família e o militar iniciam suas cenas ao se aproximar.
-- Travessia combinando caminhada e ônibus civil: ponto de evacuação, pausa para água, embarque com bagagem, paisagem durante a viagem e desembarque antes do controle.
+- Travessia combinando caminhada e ônibus civil: ponto de evacuação, pausa para água, embarque com bagagem, paisagem durante a viagem e parada diante de uma estrada cedida e desembarque antes do controle.
 - Controle da fronteira animado: a pasta é entregue, conferida e devolvida; a barreira é liberada.
 - Pátio próprio após “Alguns dias depois”, com duas ações jogáveis: organizar a bagagem e enviar uma mensagem para Mara. Davi participa de uma atividade, Lia procura informações e a família se reúne no fim do dia.
 - Falas e retratos em uma faixa abaixo da imagem; a caixa não cobre os personagens.
@@ -41,7 +41,7 @@ As trilhas originais são geradas no navegador. Não dependem de baixar gravaç�
 5. Volte à praça e aproxime-se de Lia.
 6. Vá ao poço pela parte de baixo e pressione E para encher a cantil.
 7. Siga a placa ao norte e aproxime-se de Tomás no portão a nordeste. Falar com Ivo não é obrigatório.
-8. Suba pela saída à direita de Tomás. A cena mostra o caminho até o ônibus, uma pausa para água, o embarque, a viagem e o desembarque. O último trecho até a ponte é a pé.
+8. Suba pela saída à direita de Tomás. A cena mostra o caminho até o ônibus, uma pausa para água, o embarque, a viagem e o desembarque. O motorista explica a interdição por risco de desabamento. A família contorna o trecho cedido pela trilha de pedestres; a câmera acompanha até o mapa da fronteira, sem corte.
 9. Atravesse a ponte. Ao chegar à barreira, a abordagem militar ocorre automaticamente. Aguarde ou pule a sequência para liberar a passagem.
 10. Continue a leste até Sara. Após o acolhimento, a tela “Alguns dias depois” aguarda seu comando.
 11. No pátio do abrigo, leve a bagagem ao espaço indicado no canto inferior esquerdo. Pressione E para organizá-la.
@@ -71,3 +71,5 @@ A encenação do flashback mantém a rua militar ao norte e as famílias ao sul 
 ## Continuidade das animações
 
 O movimento do flashback tem contadores próprios para antes da guerra, invasão e fuga. Trocar a legenda não reinicia os trajetos; tropas e veículos avançam uma vez e param no destino. Os testes conferem posições antes e depois da troca de fala. A viagem de ônibus tem estados de embarque e desembarque, porta, passageiros e paisagem em movimento; pausa e pulo também são testados. O transporte civil é uma criação da narrativa, sem representar uma rota real específica.
+
+A saída da família pela praça no flashback tem passo mais rápido, sem reiniciar a cada fala. A viagem de ônibus mostra rodas em movimento, deslocamento do veículo e o bloqueio antes da parada. O motivo da interrupção e a rota de pedestres são elementos da ficção.

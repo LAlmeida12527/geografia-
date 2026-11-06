@@ -6,7 +6,7 @@ ctx.imageSmoothingEnabled=false;
 const W=640,H=384,keys=new Set();
 let started=false,paused=false,ended=false,area=0,stage=0,hasDocs=false,returned=false,dialog=null,last=0,clock=0,sound=false,audio=null,musicTimer=null;
 let flashback=false,filmScene=0,filmTime=0,checked=false,inspecting=false,inspectionDone=null,typing=0,visibleChars=0,activeFace='N',lastLetter=-1;
-let flashMotion={peace:0,invasion:0,escape:0,fade:0};let busPhase='idle',busX=386,busDoor=1,busDistance=0,busBoarded={noa:false,lia:false,davi:false};let journeyWalking=false,gateOpen=0,restOrganized=false,messageSent=false,bagCarried=false,familyFollows=true;let cinematic=null,transitioning=false,transitionDone=null,dailyLife=false;let water=false,route=false,bagScene='memories',filmElapsed=0;let trail=[];const family=[{x:338,y:239},{x:350,y:250}];
+let routePan=0;let flashMotion={peace:0,invasion:0,escape:0,fade:0};let busPhase='idle',busX=386,busDoor=1,busDistance=0,busBoarded={noa:false,lia:false,davi:false};let journeyWalking=false,gateOpen=0,restOrganized=false,messageSent=false,bagCarried=false,familyFollows=true;let cinematic=null,transitioning=false,transitionDone=null,dailyLife=false;let water=false,route=false,bagScene='memories',filmElapsed=0;let trail=[];const family=[{x:338,y:239},{x:350,y:250}];
 const player={x:305,y:286,dir:0,walk:0};
 const colors={ground:'#858567',road:'#b2a382',grass:'#717e55',dark:'#3e4c3d',cream:'#ded1a5'};
 const npcs=[{id:'lia',name:'Lia · Moradora de Aurora',x:338,y:239,color:'#a86e57',hair:'#584337',initial:'L'},{id:'ivo',name:'Ivo · Professor da vila',x:229,y:288,color:'#7c8892',hair:'#c4c0a0',initial:'I'},{id:'tomas',name:'Tomás · Militar da passagem',x:504,y:130,color:'#667953',hair:'#474b3b',initial:'T'}];
@@ -117,24 +117,24 @@ function confirmRoute(){if(stage>=3)return;playScene('route',[
 ],()=>{stage=3;route=true})}
 function journeyScene(){playScene('journey',[
 {face:'N',name:'Saindo de Aurora',text:'Há um ônibus civil no ponto de saída da vila.',duration:8,tracks:[{actor:'noa',points:[[520,32]],speed:50},{actor:'lia',points:[[520,178],[520,44]],speed:48},{actor:'davi',points:[[538,178],[538,58]],speed:46}]}
-],()=>{journeyWalking=true;busPhase='approach';busX=386;busDoor=1;busDistance=0;busBoarded={noa:false,lia:false,davi:false};$('location').textContent='Estrada do Vale · Ponto de evacuação';$('areaTag').hidden=true;player.x=130;player.y=240;family[0]={x:106,y:247};family[1]={x:87,y:255};playScene('road',[
+],()=>{journeyWalking=true;busPhase='approach';busX=386;busDoor=1;busDistance=0;routePan=0;busBoarded={noa:false,lia:false,davi:false};$('location').textContent='Estrada do Vale · Ponto de evacuação';$('areaTag').hidden=true;player.x=130;player.y=240;family[0]={x:106,y:247};family[1]={x:87,y:255};playScene('road',[
 {face:'L',name:'Até o ponto de evacuação',text:'Vamos juntos até o ônibus.',duration:9,tracks:[{actor:'noa',points:[[330,240]]},{actor:'lia',points:[[309,247]]},{actor:'davi',points:[[290,255]]}]},
 {face:'N',name:'Um pouco de água',text:'Davi descansa antes de embarcar.',duration:7},
 {face:'L',name:'O embarque',text:'A família entra com a bagagem. Outras pessoas também aguardam a saída.',duration:12,tracks:[{actor:'noa',points:[[367,252],[386,234]],speed:30},{actor:'lia',points:[[355,252],[386,234]],speed:23},{actor:'davi',points:[[340,255],[386,234]],speed:19}]},
 {face:'N',name:'A caminho do vale',text:'Pela janela, Aurora fica cada vez mais distante.',duration:15},
-{face:'N',name:'Antes da fronteira',text:'O ônibus para. O controle e a ponte ficam adiante.',duration:8},
-{face:'L',name:'O desembarque',text:'O último trecho é a pé.',duration:10},
-{face:'N',name:'A ponte à vista',text:'A família segue pelo caminho indicado.',duration:9,tracks:[{actor:'noa',points:[[570,252]]},{actor:'lia',points:[[548,258]]},{actor:'davi',points:[[526,264]]}]}
+{face:'M',name:'Motorista · Estrada interrompida',text:'A estrada cedeu. O ônibus não pode passar: há risco de desabamento.',duration:10},
+{face:'M',name:'Motorista · Outra passagem',text:'A trilha de pedestres passa ao sul do trecho cedido. Sigam as placas até o posto.',duration:12},
+{face:'N',name:'Pela passagem de pedestres',text:'A família contorna a estrada interrompida. A ponte e o controle ficam adiante.',duration:16,tracks:[{actor:'noa',points:[[527,300],[631,300],[637,242],[664,206],[695,206]],speed:32},{actor:'lia',points:[[505,312],[621,312],[641,250],[651,215],[675,215]],speed:30},{actor:'davi',points:[[484,324],[611,324],[644,258],[647,224],[658,224]],speed:28}]}
 ],()=>{journeyWalking=false;busPhase='idle';enterBorder()})})}
 function enterRoadStep(){const index=cinematic.index;busPhase=['approach','rest','boarding','riding','arrival','alighting','walk'][index];if(index===3){busBoarded={noa:true,lia:true,davi:true};busDoor=0}
 if(index===5){busDoor=1;player.x=busX;player.y=234;family[0]={x:busX,y:234};family[1]={x:busX,y:234};cinematic.tracks=[{actor:'noa',points:[[busX+27,252],[busX+53,252]],speed:22,index:0},{actor:'lia',points:[[busX+21,258],[busX+31,258]],speed:17,delay:1.4,index:0},{actor:'davi',points:[[busX+16,264],[busX+10,264]],speed:14,delay:3,index:0}];busBoarded={noa:false,lia:true,davi:true};}
 }
 function updateBus(dt){if(busPhase==='alighting'){if(cinematic.time>=1.4)busBoarded.lia=false;if(cinematic.time>=3)busBoarded.davi=false;}if(busPhase==='boarding'){for(const [id,a]of [['noa',player],['lia',family[0]],['davi',family[1]]])if(Math.hypot(a.x-busX,a.y-234)<1)busBoarded[id]=true}
-if(busPhase==='riding'){busDoor=Math.max(0,busDoor-dt);busDistance+=dt*38;busX=Math.min(430,busX+dt*4)}if(busPhase==='arrival'){busX=Math.min(430,busX+dt*1.5)}
+if(busPhase==='walk')routePan=640*Math.min(1,cinematic.time/16);if(busPhase==='riding'){busDoor=Math.max(0,busDoor-dt);busDistance+=dt*38;busX=Math.min(474,busX+dt*8)}if(busPhase==='arrival'){busX=Math.min(474,busX+dt*1.5)}
 }
 
 function changeArea(){if(cinematic)return;journeyScene()}
-function enterBorder(){area=1;checked=false;gateOpen=0;player.x=55;player.y=206;family[0]={x:35,y:206};family[1]={x:18,y:206};trail=[];keys.clear();$('location').textContent='Fronteira · Posto do Vale';$('areaTag').innerHTML='A TRAVESSIA DO VALE<span>Uma passagem. Muitas incertezas.</span>';$('areaTag').hidden=false;updateJournal()}
+function enterBorder(){const continuous=routePan>=640&&player.x>=640;area=1;checked=false;gateOpen=0;if(continuous){player.x-=640;family[0].x-=640;family[1].x-=640;player.walk=0;family[0].walk=0;family[1].walk=0}else{player.x=55;player.y=206;family[0]={x:35,y:206};family[1]={x:18,y:206}}routePan=0;trail=[];keys.clear();$('location').textContent='Fronteira · Posto do Vale';$('areaTag').innerHTML='A TRAVESSIA DO VALE<span>Uma passagem. Muitas incertezas.</span>';$('areaTag').hidden=false;updateJournal()}
 function checkpointScene(){playScene('checkpoint',[
 {face:'D',name:'Duarte · Controle de fronteira',text:'Aguardem junto à mesa. De onde vêm?',duration:6,tracks:[{actor:'noa',points:[[251,213]]},{actor:'lia',points:[[238,209]]},{actor:'davi',points:[[228,226]]}]},
 {face:'L',name:'Lia',text:'De Aurora. Somos três. Estamos fugindo dos combates.',duration:6},
@@ -167,7 +167,7 @@ function showTransition(title,subtitle,done){cinematic=null;dialog=null;transiti
 function continueTransition(){if(!transitioning)return;const done=transitionDone;transitioning=false;transitionDone=null;$('presentCard').hidden=true;keys.clear();done?.();updateJournal();canvas.focus()}
 
 // Retratos originais em pixel art: boca acompanha somente o texto que está sendo revelado.
-const faces={N:['#4a4236','#bb9e63','#d4b28b'],L:['#584337','#a86e57','#d4ae88'],I:['#c4c0a0','#7c8892','#c2a184'],T:['#474b3b','#667953','#c4a37d'],D:['#343d32','#576b50','#ab8466'],S:['#674735','#d6d3ba','#c29372'],V:['#4b493e','#66714b','#c0a17a']};
+const faces={M:['#625c4c','#a68e64','#c09873'],N:['#4a4236','#bb9e63','#d4b28b'],L:['#584337','#a86e57','#d4ae88'],I:['#c4c0a0','#7c8892','#c2a184'],T:['#474b3b','#667953','#c4a37d'],D:['#343d32','#576b50','#ab8466'],S:['#674735','#d6d3ba','#c29372'],V:['#4b493e','#66714b','#c0a17a']};
 function drawFace(id,mouth=0){const c=$('portraitCanvas'),p=c.getContext('2d');p.imageSmoothingEnabled=false;const [hair,coat,skin]=faces[id]||faces.N;const r=(x,y,w,h,col)=>{p.fillStyle=col;p.fillRect(x,y,w,h)};r(0,0,64,64,'#8a9772');r(3,3,58,58,'#c2c8a3');r(8,50,48,14,coat);r(17,44,30,17,coat);r(26,37,13,14,skin);r(18,13,29,29,'#574b38');r(20,13,25,29,skin);r(17,9,31,12,hair);r(15,16,8,id==='L'||id==='S'?31:15,hair);r(43,15,6,id==='L'||id==='S'?32:15,hair);r(22,20,18,3,'#e3bb90');r(19,28,3,7,skin);r(45,28,3,7,skin);const blink=Math.sin(clock*1.3)>.996;r(24,27,5,blink?1:4,'#e4dcc3');r(36,27,5,blink?1:4,'#e4dcc3');r(26,27,2,blink?1:4,'#3b493a');r(36,27,2,blink?1:4,'#3b493a');r(23,24,7,1,hair);r(35,24,7,1,hair);r(31,30,3,5,'#b58b69');r(29,38,9,mouth===2?4:mouth===1?2:1,'#6e4439');if(mouth===2)r(31,38,5,1,'#e2c8a5');if(id==='I'){r(22,26,9,1,'#514e45');r(34,26,9,1,'#514e45');r(30,28,5,1,'#514e45');r(28,36,11,2,hair)}if(id==='T'||id==='D'||id==='V'){r(15,9,35,9,coat);r(14,16,37,3,'#3e4b39');r(30,11,5,4,'#c3b681')}if(id==='N'){r(17,48,30,5,'#b87754');r(36,51,6,13,'#a2694b')}if(id==='S'){r(40,53,3,9,'#9f5e4b');r(37,56,9,3,'#9f5e4b')}}
 function soldier(x,y){sprite(x,y,'#667953','#474b3b');rect(x-8,y-30,17,6,'#55684d');rect(x-9,y-25,19,2,'#384d3a');rect(x-5,y-18,11,2,'#3d5140');line(x-8,y-14,x+7,y-6,'#343d33',3);rect(x+5,y-10,3,9,'#343d33')}
 function beginFilm(){flashMotion={peace:0,invasion:0,escape:0,fade:0};filmElapsed=0;flashback=true;filmScene=0;filmTime=0;setMusic('aurora');$('filmHeading').hidden=false;playScene('flashback',[
@@ -186,8 +186,8 @@ function impact(){if(!sound||!audio)return;const count=audio.sampleRate*.7,buffe
 function filmBlocking(){
  const invasion=filmScene>=2,escape=filmScene>=6;
  const advance=Math.min(230,flashMotion.invasion*5);
- const familyX=escape?145+Math.min(148,flashMotion.escape*12):145;
- return {invasion,escape,vehicles:invasion?[{x:584-advance,y:165},{x:672-advance,y:165}]:[],army:invasion?Array.from({length:6},(_,i)=>({x:600-advance-i*37,y:164+(i%2)*23})):[],civilians:invasion?Array.from({length:4},(_,i)=>({x:escape?40+i*39+Math.min(115,flashMotion.escape*9):40+i*39,y:349+(i%2)*8})):[],family:[{x:familyX,y:330},{x:familyX+23,y:331},{x:familyX-13,y:340}]};
+ const familyX=escape?145+Math.min(148,flashMotion.escape*26):145;
+ return {invasion,escape,vehicles:invasion?[{x:584-advance,y:165},{x:672-advance,y:165}]:[],army:invasion?Array.from({length:6},(_,i)=>({x:600-advance-i*37,y:164+(i%2)*23})):[],civilians:invasion?Array.from({length:4},(_,i)=>({x:escape?40+i*39+Math.min(115,flashMotion.escape*20):40+i*39,y:349+(i%2)*8})):[],family:[{x:familyX,y:330},{x:familyX+23,y:331},{x:familyX-13,y:340}]};
 }
 function drawFilm(){
  const scene=filmBlocking(),intense=scene.invasion;
@@ -212,8 +212,8 @@ function drawFilm(){
  // Uma parede e as casas distinguem o abrigo e a praça da rua ocupada.
  rect(20,273,35,11,'#969377');rect(188,273,167,11,'#969377');rect(20,271,35,3,'#b3ae8c');rect(188,271,167,3,'#b3ae8c');for(let x=192;x<353;x+=16)rect(x,279,9,1,'#777d62');
  label('RUA OCUPADA',392,135,'#e3c295',7);label(scene.escape?'SAÍDA PELA PRAÇA →':'ABRIGO DAS FAMÍLIAS',370,355,'#e3d3a8',7);
- for(const[i,c]of scene.civilians.entries())sprite(c.x,c.y,['#8e7965','#7c8892','#a58a63','#8c6f63'][i],'#554839',2,scene.escape?flashMotion.escape*.6:0);
- const [lia,noa,davi]=scene.family;sprite(lia.x,lia.y,'#a86e57','#584337',2,scene.escape?flashMotion.escape*.6:0);sprite(noa.x,noa.y,'#bb9e63','#4a4236',2,scene.escape?flashMotion.escape*.6:0);sprite(davi.x,davi.y,'#8f6d5c','#514536',2,scene.escape?flashMotion.escape*.6:0,true);
+ for(const[i,c]of scene.civilians.entries())sprite(c.x,c.y,['#8e7965','#7c8892','#a58a63','#8c6f63'][i],'#554839',2,scene.escape?flashMotion.escape*1.15:0);
+ const [lia,noa,davi]=scene.family;sprite(lia.x,lia.y,'#a86e57','#584337',2,scene.escape?flashMotion.escape*1.15:0);sprite(noa.x,noa.y,'#bb9e63','#4a4236',2,scene.escape?flashMotion.escape*1.15:0);sprite(davi.x,davi.y,'#8f6d5c','#514536',2,scene.escape?flashMotion.escape*1.15:0,true);
  }
  ctx.restore();rect(0,0,W,28,'#17231f');rect(0,H-15,W,15,'#17231f');
  // Um intervalo escuro curto entre os planos evita a troca brusca de contexto.
@@ -272,20 +272,28 @@ const y=193;rect(x-105,y+48,142,7,'#4f604955');rect(x-110,y,145,47,'#597f87');re
 for(let i=0;i<5;i++){const wx=x-100+i*23;rect(wx,y+7,20,20,'#abc3b6');rect(wx+1,y+8,17,2,'#d0d9c0');rect(wx+9,y+7,1,20,'#718e8b')}
 for(const [i,id]of ['noa','lia','davi'].entries()){if(!busBoarded[id])continue;const px=x-92+i*23;rect(px,y+14+(i===2?3:0),7,9,'#cba581');rect(px,y+12+(i===2?3:0),8,4,['#4a4236','#584337','#514536'][i]);rect(px-1,y+23,10,4,['#bb9e63','#a86e57','#8f6d5c'][i])}
 rect(x-5,y+20,18,27,'#36555c');if(door<.5){rect(x-4,y+21,7,25,'#8ba9a2');rect(x+5,y+21,7,25,'#9bb4aa')}else{rect(x-5,y+20,3,27,'#c1c6aa');rect(x+11,y+20,3,27,'#c1c6aa');rect(x-1,y+43,15,3,'#b8b699');rect(x+3,y+47,14,3,'#a5ab90')}
-rect(x+31,y+31,5,4,'#ddd1a0');rect(x-110,y+32,4,4,'#bf8a68');label('TRANSPORTE CIVIL',x-97,y+37,'#e0dbc0',6);
+if(busPhase==='riding'){for(const wx of [x-81,x+20]){const a=busDistance*.16;line(wx-3*Math.cos(a),y+49-3*Math.sin(a),wx+3*Math.cos(a),y+49+3*Math.sin(a),'#cad0b8');}}rect(x+31,y+31,5,4,'#ddd1a0');rect(x-110,y+32,4,4,'#bf8a68');label('TRANSPORTE CIVIL',x-97,y+37,'#e0dbc0',6);
 }
+function drawRoadClosure(){
+// Deslizamento na via de veículos; o corredor de pedestres contorna a área pelo sul.
+rect(538,219,85,55,'#656852');rect(547,223,64,43,'#424d42');for(let i=0;i<10;i++)rect(536+i*9,215+(i%3)*3,10,6,'#8a8466');for(let i=0;i<7;i++)rect(536+i*12,270-(i%2)*4,12,5,'#a19371');
+rect(527,209,4,61,'#7c7959');rect(524,208,108,5,'#d1bc83');for(let i=0;i<11;i++)rect(525+i*10,208,5,5,'#826853');label('ESTRADA CEDIDA · NÃO PASSAR',454,187,'#e6cba0',7);
+rect(496,270,3,37,'#727a58');label('PEDESTRES ↓',462,276,'#e5dcb2',7);rect(490,287,143,41,'#b4a07b');for(let i=0;i<6;i++){rect(510+i*21,302,9,2,'#e2d4a9');rect(516+i*21,299,2,8,'#e2d4a9')}rect(626,243,14,85,'#b4a07b');label('→ POSTO DO VALE',490,350,'#e5dcb2',7);
+}
+
 function drawJourney(){
-ground(true);rect(0,0,W,150,'#8d9f7d');rect(0,0,W,78,'#a3b49a');
+ctx.save();ctx.translate(-routePan,0);ground(true);rect(0,0,W,150,'#8d9f7d');rect(0,0,W,78,'#a3b49a');
 const scrolling=busPhase==='riding'||busPhase==='arrival'||busPhase==='alighting'||busPhase==='walk';const offset=scrolling?busDistance:0;
 for(let i=0;i<12;i++){const x=((i*74-offset*.35)%888+888)%888-90;rect(x,100+Math.sin(i)*8,85,45,'#788f6d');tree(x+23,149,false)}rect(0,152,W,70,'#8c926e');rect(0,215,W,60,'#b6a27e');rect(0,273,W,111,'#89936a');for(let i=0;i<22;i++)rect(((i*37-offset)%814+814)%814-37,258,16,1,'#c5b491');
 if(busDistance<140){const sign=180-busDistance;rect(sign,133,3,55,'#6d7958');label('PONTO DE EVACUAÇÃO',sign-70,136,'#e5daba',7);sprite(sign+18,196,'#9b8966','#5c4e3e');sprite(sign+39,200,'#879789','#654d3c')}
-if(busPhase==='arrival'||busPhase==='alighting'||busPhase==='walk'){rect(550,109,54,31,'#c2b995');rect(547,104,60,7,'#7f8e6a');rect(568,115,12,16,'#73846b');label('CONTROLE DE FRONTEIRA →',444,168,'#e6dbb6',7)}
+if(['riding','arrival','alighting','walk'].includes(busPhase)&&busDistance>330)drawRoadClosure();
 label(busPhase==='riding'?'VIAGEM PELO VALE':'ESTRADA DO VALE',25,44,'#e5dfc2',9);
-drawCivilBus(busX,busDoor);
+ctx.save();if(busPhase==='riding')ctx.translate(0,Math.sin(busDistance*.13)*.6);drawCivilBus(busX,busDoor);ctx.restore();
+ctx.save();ctx.translate(640,0);borderMap();soldier(274,207);soldier(318,151);drawGate();sprite(borderNPC.x,borderNPC.y,borderNPC.color,borderNPC.hair);ctx.restore();
 const actors=[{...family[0],id:'lia',color:'#a86e57',hair:'#584337'},{...family[1],id:'davi',color:'#8f6d5c',hair:'#514536',child:true},{...player,id:'noa',color:'#bb9e63',hair:'#4a4236'}].sort((a,b)=>a.y-b.y);
 for(const c of actors)if(!busBoarded[c.id]){sprite(c.x,c.y,c.color,c.hair,c.dir||0,c.walk||0,c.child);if(c.id==='noa'){rect(c.x-11,c.y-10,8,8,'#a18a5f');rect(c.x-9,c.y-12,4,3,'#c3ad7a')}}
 if(busPhase==='rest'){rect(family[1].x+5,family[1].y-17,4,7,'#a6c0af');rect(family[1].x+6,family[1].y-18,3,2,'#d3ddbf')}
-rect(0,0,W,16,'#23392a');rect(0,H-12,W,12,'#23392a');
+ctx.restore();rect(0,0,W,16,'#23392a');rect(0,H-12,W,12,'#23392a');
 }
 
 function drawShelter(){
