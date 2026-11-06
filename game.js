@@ -6,7 +6,7 @@ ctx.imageSmoothingEnabled=false;
 const W=640,H=384,keys=new Set();
 let started=false,paused=false,ended=false,area=0,stage=0,hasDocs=false,returned=false,dialog=null,last=0,clock=0,sound=false,audio=null,musicTimer=null;
 let flashback=false,filmScene=0,filmTime=0,checked=false,inspecting=false,inspectionDone=null,typing=0,visibleChars=0,activeFace='N',lastLetter=-1;
-let water=false,route=false,bagScene='memories',filmElapsed=0;let trail=[];const family=[{x:338,y:239},{x:350,y:250}];
+let cinematic=null,transitioning=false,transitionDone=null,dailyLife=false;let water=false,route=false,bagScene='memories',filmElapsed=0;let trail=[];const family=[{x:338,y:239},{x:350,y:250}];
 const player={x:305,y:286,dir:0,walk:0};
 const colors={ground:'#858567',road:'#b2a382',grass:'#717e55',dark:'#3e4c3d',cream:'#ded1a5'};
 const npcs=[{id:'lia',name:'Lia · Moradora de Aurora',x:338,y:239,color:'#a86e57',hair:'#584337',initial:'L'},{id:'ivo',name:'Ivo · Professor da vila',x:229,y:288,color:'#7c8892',hair:'#c4c0a0',initial:'I'},{id:'tomas',name:'Tomás · Militar da passagem',x:504,y:130,color:'#667953',hair:'#474b3b',initial:'T'}];
@@ -58,70 +58,90 @@ if(child)ctx.restore();}
 function marker(x,y){let b=Math.sin(clock*3)*2;rect(x-5,y-49+b,10,12,'#293b2a');rect(x-4,y-50+b,8,11,'#e0c481');rect(x-1,y-48+b,2,5,'#6c6445');rect(x-1,y-42+b,2,2,'#6c6445');rect(x-2,y-38+b,4,2,'#e0c481')}
 function objective(){if(area&&!checked)return {x:274,y:207,id:'military'};if(area)return {x:473,y:165,id:'sara'};if(stage===0)return npcs[0];if(stage===1)return hasDocs?npcs[0]:{x:130,y:336,id:'docs'};if(stage===2){if(!water)return{x:278,y:232,id:'water'};if(!route)return npcs[1];return npcs[2]}return{x:520,y:18,id:'exit'}}
 function nearest(){const entities=area?[borderNPC,{id:'military',name:'Sargento Duarte · Controle de fronteira',x:274,y:207}]:[...npcs,...(stage===2&&!water?[{id:'water',x:278,y:232}]:[]),...(stage===1&&!hasDocs?[{id:'docs',x:130,y:336}]:[]),{id:'exit',x:520,y:18}];let best=null,dist=40;for(const n of entities){const d=Math.hypot(n.x-player.x,n.y-player.y);if(d<dist){dist=d;best=n}}return best}
-function updateJournal(){ $('preparation').textContent='PREPARAÇÃO · '+(water?'✓ Água':'○ Água')+' / '+(route?'✓ Rota':'○ Rota');let current=Math.min(stage,3);for(let i=0;i<4;i++){$('q'+i).className=ended||i<current?'done':i===current?'active':'';if(ended||i<current)$('q'+i).querySelector('.step').textContent='✓'}$('progressCount').textContent=ended?'04 / 04':String(current+1).padStart(2,'0')+' / 04';$('inspectBag').disabled=!(hasDocs||returned);$('inventoryText').innerHTML=hasDocs?'Documentos da família<small>Memórias de uma vida em Aurora.</small>':returned?'Documentos entregues<small>A família está pronta para partir.</small>':'Um pouco de coragem.<small>E espaço para o essencial.</small>';const goals=['Encontre sua mãe na praça, perto da mala.','Busque os documentos na entrada da casa a sudoeste.',!water?'Encha a cantil no poço para a caminhada.':!route?'Peça a Ivo informações sobre a estrada.':'Confirme com Tomás a rota pelo vale.',area&&!checked?'Apresente a pasta ao militar, antes da barreira.':area?'Procure Sara na entrada do posto de acolhimento.':'Siga ao norte pelo portão, rumo à fronteira.'];$('gameStatus').textContent=ended?'Jornada concluída · Um novo começo':goals[current];if(stage===1&&hasDocs)$('gameStatus').textContent='Leve os documentos de volta para Lia.';}
-function talk(name,lines,complete,initial){keys.clear();dialog={name,lines,index:0,complete};activeFace=initial||name[0];$('dialogue').hidden=false;$('interaction').hidden=true;showLine()}
+function updateJournal(){ $('preparation').textContent='PREPARAÇÃO · '+(water?'✓ Água':'○ Água')+' / '+(route?'✓ Rota':'↑ Rota do vale');let current=Math.min(stage,3);for(let i=0;i<4;i++){$('q'+i).className=ended||i<current?'done':i===current?'active':'';if(ended||i<current)$('q'+i).querySelector('.step').textContent='✓'}$('progressCount').textContent=ended?'04 / 04':String(current+1).padStart(2,'0')+' / 04';$('inspectBag').disabled=!!cinematic||transitioning||!(hasDocs||returned);$('inventoryText').innerHTML=hasDocs?'Documentos da família<small>Memórias de uma vida em Aurora.</small>':returned?'Documentos entregues<small>A família está pronta para partir.</small>':'Um pouco de coragem.<small>E espaço para o essencial.</small>';const goals=['Encontre sua mãe na praça, perto da mala.','Busque os documentos na entrada da casa a sudoeste.',!water?'Encha a cantil no poço para a caminhada.':'Siga a placa ao norte e encontre Tomás no portão.',area&&!checked?'Apresente a pasta ao militar, antes da barreira.':area?'Procure Sara na entrada do posto de acolhimento.':'Siga ao norte pelo portão, rumo à fronteira.'];$('gameStatus').textContent=ended?'Jornada concluída · Um novo começo':goals[current];if(stage===1&&hasDocs)$('gameStatus').textContent='Leve os documentos de volta para Lia.';if(dailyLife&&!ended)$('gameStatus').textContent='Cenas do cotidiano · Recomeçar leva tempo.';}
+function talk(name,lines,complete,initial){if(cinematic||transitioning)return;$('dockIdle').hidden=true;keys.clear();dialog={name,lines,index:0,complete};activeFace=initial||name[0];$('dialogue').hidden=false;$('interaction').hidden=true;showLine()}
 function showLine(){const entry=dialog.lines[dialog.index];const text=typeof entry==='string'?entry:entry.text;activeFace=typeof entry==='string'?activeFace:(entry.face||activeFace);$('speaker').textContent=typeof entry==='string'?dialog.name:(entry.name||dialog.name);dialog.text=text;typing=0;visibleChars=0;$('dialogueText').textContent='';$('nextDialogue').innerHTML=(dialog.index===dialog.lines.length-1?'Concluir':'Continuar')+' <kbd>E ↵</kbd>';if(flashback){filmScene=dialog.index;filmTime=0;if(filmScene===2||filmScene===3)impact()}drawFace(activeFace,0)}
-function advance(){if(!dialog||inspecting||$('infoModal').open)return;if(visibleChars<dialog.text.length){typing=dialog.text.length/34;visibleChars=dialog.text.length;$('dialogueText').textContent=dialog.text;drawFace(activeFace,0);return}dialog.index++;if(dialog.index<dialog.lines.length)showLine();else{const cb=dialog.complete;dialog=null;$('dialogue').hidden=true;cb?.();updateJournal();canvas.focus()}}
+function advance(){if(paused)return;if(cinematic){nextScene();return}if(transitioning){continueTransition();return}if(!dialog||inspecting||$('infoModal').open)return;if(visibleChars<dialog.text.length){typing=dialog.text.length/34;visibleChars=dialog.text.length;$('dialogueText').textContent=dialog.text;drawFace(activeFace,0);return}dialog.index++;if(dialog.index<dialog.lines.length)showLine();else{const cb=dialog.complete;dialog=null;$('dialogue').hidden=true;$('dockIdle').hidden=false;cb?.();updateJournal();canvas.focus()}}
 const speech=(face,name,text)=>({face,name,text});
-function interact(){if(!started||paused||ended||inspecting||$('infoModal').open)return;if(dialog){advance();return}const n=nearest();if(!n)return;switch(n.id){
-case 'lia':if(area){talk('Lia · Sua mãe',['Não solte a mão do seu irmão. Vamos falar com a equipe antes de procurar onde descansar.'],null,'L');break}
-if(stage===0)talk('Lia · Sua mãe',[
-'Noa, seu irmão está comigo. Vamos sair juntos. A estrada da escola foi fechada pelos militares.',
-'Saímos tão depressa que deixei a pasta na entrada da nossa casa, perto do varal. Nossos documentos estão lá, junto da carta da tia e da fotografia.',
-'Tomás disse que esse trecho está sem combates agora. Pegue a pasta e volte direto. Vou esperar aqui com seu irmão.'
-],()=>{stage=1},'L');
-else if(stage===1&&hasDocs)talk('Lia · Sua mãe',[
-speech('N','Noa','Mãe, achei tudo. A foto ainda está aqui.'),speech('L','Lia','Foi no aniversário do seu irmão. A praça estava cheia naquele dia… Pensei que a gente tivesse perdido essa lembrança.'),
-speech('L','Lia','Guarde a pasta com você. Os documentos podem ajudar na identificação. Se alguém perder os papéis, ainda assim precisa poder pedir proteção.'),
-speech('L','Lia','Agora procure Tomás, no portão a nordeste. Precisamos saber qual caminho continua aberto.')
-],()=>{hasDocs=false;returned=true;stage=2},'L');else talk('Lia · Sua mãe',[stage===1?'Nossa casa está a sudoeste, perto do varal. Volte assim que encontrar a pasta.':'Vamos procurar Tomás no portão. Seu irmão não aguenta caminhar muito mais.'],null,'L');break;
-case 'water':water=true;talk('Noa · Preparar a partida',[speech('N','Noa','Enchi a cantil. Davi bebeu um pouco; o restante precisa durar até o posto.'),speech('L','Lia','Obrigada, filho. Fale com seu professor. Ele estava ajudando as pessoas que vieram da estrada principal.')],()=>updateJournal(),'N');break;
-case 'ivo':if(stage===2){route=true;talk('Ivo · Seu professor',[speech('I','Ivo','A estrada da escola está fechada. Eu vi a barreira: veículos atravessados e militares mandando todos voltarem.'),speech('N','Noa','Então como vamos chegar à fronteira?'),speech('I','Ivo','Pelo portão ao norte, depois pela ponte do vale. É mais longe. Tomás está recebendo informações dessa passagem; confirmem com ele antes de partir.'),speech('I','Ivo','Vocês estão deixando seu território por causa da guerra. Leve esta orientação: procure a equipe de acolhimento assim que cruzarem.')],()=>updateJournal(),'I');break}talk('Ivo · Seu professor',[
-'Noa… a escola virou abrigo esta noite. As famílias chegaram sem saber se poderiam voltar para casa.',
-'Enquanto saímos de casa mas continuamos no nosso país, estamos em deslocamento interno. Vocês pretendem cruzar a fronteira para buscar proteção.',
-'Uma fronteira muda quem controla o território. Não apaga o que vocês viveram nem resolve tudo de uma vez. Levem água e procurem informação no posto.'
+function playScene(kind,steps,complete){
+ keys.clear();player.walk=0;dialog=null;$('dialogue').hidden=false;$('interaction').hidden=true;$('dockIdle').hidden=true;$('nextDialogue').textContent='Próxima cena →';
+ cinematic={kind,steps,index:0,time:0,elapsed:0,complete};$('skipScene').hidden=false;$('scenePace').hidden=false;showSceneStep();updateJournal();
+}
+function showSceneStep(){const step=cinematic.steps[cinematic.index];activeFace=step.face||'N';$('speaker').textContent=step.name||'';$('dialogueText').textContent=step.text||'';drawFace(activeFace,0);$('scenePace').textContent='CENA AUTOMÁTICA · '+(cinematic.index+1)+' / '+cinematic.steps.length+' · Esc pausa';if(cinematic.kind==='flashback'){filmScene=cinematic.index;filmTime=0;if(filmScene===2)impact()}}
+function nextScene(){if(!cinematic||paused)return;const current=cinematic;current.index++;current.time=0;if(current.index<current.steps.length)showSceneStep();else finishScene()}
+function finishScene(){if(!cinematic)return;const done=cinematic.complete;cinematic=null;keys.clear();$('dialogue').hidden=true;$('dockIdle').hidden=false;$('skipScene').hidden=true;$('scenePace').hidden=true;done?.();updateJournal();canvas.focus()}
+function updateScene(dt){const c=cinematic;c.time+=dt;c.elapsed+=dt;const step=c.steps[c.index],p=Math.min(1,c.time/(step.duration||4));if(c.kind==='flashback'){filmTime=c.time;filmElapsed=c.elapsed;$('filmHeading').textContent='FLASHBACK · AURORA · '+(c.index<2?'NA VÉSPERA':'MADRUGADA DA INVASÃO')}
+if(c.kind==='checkpoint'){player.x=254;player.y=220;family[0]={x:245,y:202};family[1]={x:231,y:218};}
+if(c.kind==='welcome'){player.x=466;player.y=196;family[0]={x:443,y:191};family[1]={x:426,y:204};}
+if(c.kind==='daily'){if(c.index===4){player.x=443;player.y=240;family[0]={x:408,y:240};family[1]={x:425,y:239}}if(c.index===0){family[0]={x:440,y:220};family[1]={x:425+22*p,y:235}}if(c.index===1){player.x=426;player.y=238;family[0]={x:408,y:240};family[1]={x:425,y:239}}if(c.index===2){family[1]={x:450+58*p,y:245};}if(c.index===3){player.x=530;player.y=220;}}
+const speaking=step.text&&c.time<Math.min(2.5,(step.text.length/32));drawFace(activeFace,speaking?1+Math.floor(clock*10)%2:0);
+if(c.kind==='daily')family[1].walk=(c.index===0||c.index===2)?c.time:0;if(c.time>=(step.duration||4))nextScene();}
+function interact(){if(!started||paused||ended||inspecting||transitioning||$('infoModal').open)return;if(cinematic){nextScene();return}if(dialog){advance();return}const n=nearest();if(!n)return;
+switch(n.id){
+case 'lia':if(stage===0)meetFamily();else if(stage===1&&hasDocs)returnFamily();else talk('Lia · Sua mãe',[stage===1?'A pasta ficou na entrada da nossa casa, perto do varal.':'Estou pronta. Vamos levar água e seguir pelo vale.'],null,'L');break;
+case 'docs':collectFolder();break;
+case 'water':if(!water)playScene('water',[{face:'N',name:'Preparar a caminhada',text:'Água para o caminho.',duration:4}],()=>{water=true;route=true;updateJournal()});break;
+case 'ivo':talk('Ivo · Conversa opcional',[
+'Quem precisa sair de casa mas continua no próprio país está em deslocamento interno. Ao atravessar uma fronteira, vocês podem buscar proteção em outro país.',
+'A escola virou abrigo. A guerra também muda a função dos lugares: onde havia aulas, agora famílias procuram um teto.'
 ],null,'I');break;
-case 'docs':hasDocs=true;updateJournal();openBag(()=>talk('Noa · A pasta da família',[
-'A carta da tia, os documentos e a foto… Está tudo aqui. Vou guardar a pasta longe da poeira.',
-'Na fotografia, meu irmão está sorrindo na praça. Quero que ele possa voltar a sorrir assim.'
-],null,'N'));break;
-case 'tomas':if(stage===2&&(!water||!route)){talk('Tomás · Militar',['A passagem exige uma caminhada. Levem água e conversem com o professor perto da praça sobre a estrada interditada. Voltem quando estiverem preparados.'],null,'T');break}if(stage<2)talk('Tomás · Militar da passagem',['O setor a leste está interditado. Fique longe da cerca. Reúna sua família antes de seguir para o vale.'],null,'T');else talk('Tomás · Militar da passagem',[
-speech('T','Tomás · Militar','Parem junto ao portão. Vocês estão saindo de Aurora?'),speech('N','Noa','Sim. Minha mãe, meu irmão e eu. Queremos chegar ao posto do outro lado da fronteira.'),
-speech('T','Tomás · Militar','A estrada principal está bloqueada por causa dos combates. A rota pelo vale está aberta neste momento. Sigam ao norte, depois atravessem a ponte a leste.'),
-speech('L','Lia','E se a passagem fechar antes de chegarmos?'),speech('T','Tomás · Militar','Falem com a equipe no controle. Não tentem entrar na área interditada. Mantenham a família reunida e a pasta à mão.')
-],()=>{stage=3},'T');break;
-case 'exit':if(stage<3)talk('Tomás · Militar',['Aguarde. Reúna sua família e confirme a rota comigo antes de seguir.'],null,'T');else changeArea(1);break;
-case 'military':if(checked){talk('Sargento Duarte',['A passagem está liberada. Procurem Sara, de roupa clara, diante do posto.'],null,'D');break}
-talk('Sargento Duarte · Controle de fronteira',[
-speech('D','Sargento Duarte','Parem antes da barreira. A via lateral é área proibida. De onde vocês vêm?'),speech('L','Lia','Da vila de Aurora. Tropas entraram na madrugada. Saímos quando os combates chegaram à nossa rua.'),
-speech('D','Sargento Duarte','Quem está com a senhora? Têm documentos de identificação?'),speech('L','Lia','Meus filhos, Noa e Davi. A pasta está com o Noa.'),speech('N','Noa','Estes são os nossos documentos. Estamos procurando um lugar seguro.')
-],()=>{bagScene='checkpoint';openBag(()=>talk('Sargento Duarte · Controle de fronteira',[
-speech('D','Sargento Duarte','Lia, Noa e Davi, de Aurora. Certo. Vou devolver a pasta. Alguém precisa de atendimento urgente?'),speech('L','Lia','Estamos exaustos. Meu filho pequeno precisa de água e de um lugar para descansar.'),speech('D','Sargento Duarte','Podem passar. Procurem a equipe de acolhimento à frente. Ela vai orientar o registro e o pedido de proteção. Não entrem no setor cercado.')
-],()=>{checked=true;updateJournal()},'D'))},'D');break;
-case 'sara':if(!checked){talk('Sara',['Primeiro procurem o controle junto à ponte. Se houver uma emergência médica, avisem o militar imediatamente.'],null,'S');break}
-talk('Sara · Equipe de acolhimento',[
-speech('S','Sara','Olá. Meu nome é Sara. Vocês precisam de água ou atendimento? Há outras pessoas da família que ainda estão a caminho?'),speech('L','Lia','Somos nós três. Minha irmã saiu antes, mas ainda não conseguimos falar com ela.'),speech('S','Sara','Vamos tentar orientar vocês sobre como procurá-la. Primeiro, sentem um pouco. Há água e um espaço de descanso logo ali.'),speech('N','Noa','A gente vai poder ficar?'),speech('S','Sara','Vocês podem buscar proteção. Vamos explicar o registro e o pedido de refúgio. O reconhecimento depende de análise; vocês não precisam entender tudo hoje.'),speech('N','Noa','Ainda não sei onde vamos morar. Mas hoje podemos parar de caminhar.')
-],()=>{ended=true;$('ending').hidden=false;$('interaction').hidden=true;family[0]={x:407,y:236};family[1]={x:425,y:239};updateJournal();setMusic('hope');tone(523,.4)},'S');break;
+case 'tomas':if(stage<2||!water){talk('Tomás · Militar',['Reúna sua família e leve água. A estrada da escola está interditada; a passagem é pelo vale.'],null,'T');break}confirmRoute();break;
+case 'exit':if(stage>=3)changeArea(1);break;
+case 'military':if(!checked)checkpointScene();else talk('Duarte · Militar',['Passagem aberta. A equipe de acolhimento está à frente.'],null,'D');break;
+case 'sara':if(checked)welcomeScene();break;
 }}
-function changeArea(next){area=next;checked=false;player.x=55;player.y=206;family[0]={x:35,y:206};family[1]={x:18,y:206};trail=[];keys.clear();$('location').textContent='Fronteira · Posto do Vale';$('areaTag').innerHTML='A TRAVESSIA DO VALE<span>Uma passagem. Muitas incertezas.</span>';$('areaTag').hidden=false;talk('Noa · A caminho da fronteira',[
-'Conseguimos chegar à ponte. A vila ficou para trás, mas ainda escuto os combates ao longe.',
-'Minha mãe segura a mão de Davi. Há militares na barreira do outro lado. Vou ficar perto dela.'
-],null,'N');updateJournal()}
+function meetFamily(){playScene('reunion',[
+{face:'L',name:'Lia · Sua mãe',text:'A pasta ficou em casa. Está na entrada, junto ao varal.',duration:4},
+{face:'N',name:'Noa',text:'Vou buscar. Fiquem juntos aqui.',duration:3}
+],()=>{stage=1})}
+function collectFolder(){hasDocs=true;drawPhoto('photoThumb');playScene('photo',[
+{face:'N',name:'O que levamos conosco',text:'Documentos, uma carta… e o aniversário de Davi.',duration:5},
+{face:'N',name:'Noa',text:'Ainda temos essa lembrança.',duration:3}
+],()=>{updateJournal();$('inspectBag').disabled=false})}
+function returnFamily(){playScene('return',[
+{face:'L',name:'Lia',text:'Você trouxe a fotografia… Obrigada, filho.',duration:4},
+{face:'N',name:'Preparar a partida',text:'Agora, água e uma rota segura.',duration:3}
+],()=>{hasDocs=false;returned=true;stage=2;family[0]={x:338,y:239};family[1]={x:353,y:252}})}
+function confirmRoute(){if(stage>=3)return;playScene('route',[
+{face:'T',name:'Tomás · Militar',text:'A estrada principal está fechada. Sigam ao norte, pela ponte do vale.',duration:5}
+],()=>{stage=3;route=true})}
+function changeArea(next){area=next;checked=false;player.x=55;player.y=206;family[0]={x:35,y:206};family[1]={x:18,y:206};trail=[];keys.clear();$('location').textContent='Fronteira · Posto do Vale';$('areaTag').innerHTML='A TRAVESSIA DO VALE<span>Uma passagem. Muitas incertezas.</span>';$('areaTag').hidden=false;updateJournal()}
+function checkpointScene(){playScene('checkpoint',[
+{face:'D',name:'Duarte · Controle de fronteira',text:'Parem. De onde vêm? Documentos, por favor.',duration:4},
+{face:'L',name:'Lia',text:'De Aurora. Somos três. Estamos fugindo dos combates.',duration:4},
+{face:'D',name:'Conferência dos documentos',text:'Lia, Noa e Davi. A família aguarda enquanto o militar confere a pasta.',duration:5},
+{face:'D',name:'Duarte',text:'Podem passar. Procurem a equipe de acolhimento.',duration:4}
+],()=>{checked=true;updateJournal()})}
+function welcomeScene(){playScene('welcome',[
+{face:'S',name:'Sara · Acolhimento',text:'Há água e um lugar para descansar. Vamos orientar o pedido de proteção.',duration:5},
+{face:'L',name:'Lia',text:'Também precisamos encontrar minha irmã, Mara.',duration:4}
+],()=>{setMusic('hope');showTransition('ALGUNS DIAS DEPOIS','Abrigo temporário do Vale',beginDaily)})}
+function beginDaily(){dailyLife=true;$('areaTag').innerHTML='ABRIGO TEMPORÁRIO DO VALE<span>A vida precisa continuar.</span>';playScene('daily',[
+{face:'S',name:'Água e atendimento',text:'Primeiro, as necessidades de hoje.',duration:6},
+{face:'L',name:'Um lugar temporário',text:'A família organiza o pouco que conseguiu trazer.',duration:6},
+{face:'N',name:'Voltar a aprender',text:'Davi encontra outras crianças em uma atividade de acolhimento.',duration:7},
+{face:'N',name:'Reencontrar quem ficou longe',text:'No ponto de comunicação, Noa deixa uma mensagem para Mara.',duration:6},
+{face:'N',name:'Um primeiro passo',text:'A fotografia encontra um novo lugar junto da família.',duration:5}
+],completeJourney)}
+function completeJourney(){dailyLife=true;ended=true;family[0]={x:408,y:240};family[1]={x:425,y:239};player.x=443;player.y=240;$('ending').hidden=false;$('interaction').hidden=true;updateJournal()}
+function showTransition(title,subtitle,done){cinematic=null;dialog=null;transitioning=true;transitionDone=done;keys.clear();$('dialogue').hidden=true;$('dockIdle').hidden=false;$('skipScene').hidden=true;$('scenePace').hidden=true;$('transitionTitle').textContent=title;$('transitionSubtitle').textContent=subtitle;$('presentCard').hidden=false;}
+function continueTransition(){if(!transitioning)return;const done=transitionDone;transitioning=false;transitionDone=null;$('presentCard').hidden=true;keys.clear();done?.();updateJournal();canvas.focus()}
+
 // Retratos originais em pixel art: boca acompanha somente o texto que está sendo revelado.
 const faces={N:['#4a4236','#bb9e63','#d4b28b'],L:['#584337','#a86e57','#d4ae88'],I:['#c4c0a0','#7c8892','#c2a184'],T:['#474b3b','#667953','#c4a37d'],D:['#343d32','#576b50','#ab8466'],S:['#674735','#d6d3ba','#c29372'],V:['#4b493e','#66714b','#c0a17a']};
 function drawFace(id,mouth=0){const c=$('portraitCanvas'),p=c.getContext('2d');p.imageSmoothingEnabled=false;const [hair,coat,skin]=faces[id]||faces.N;const r=(x,y,w,h,col)=>{p.fillStyle=col;p.fillRect(x,y,w,h)};r(0,0,64,64,'#8a9772');r(3,3,58,58,'#c2c8a3');r(8,50,48,14,coat);r(17,44,30,17,coat);r(26,37,13,14,skin);r(18,13,29,29,'#574b38');r(20,13,25,29,skin);r(17,9,31,12,hair);r(15,16,8,id==='L'||id==='S'?31:15,hair);r(43,15,6,id==='L'||id==='S'?32:15,hair);r(22,20,18,3,'#e3bb90');r(19,28,3,7,skin);r(45,28,3,7,skin);const blink=Math.sin(clock*1.3)>.996;r(24,27,5,blink?1:4,'#e4dcc3');r(36,27,5,blink?1:4,'#e4dcc3');r(26,27,2,blink?1:4,'#3b493a');r(36,27,2,blink?1:4,'#3b493a');r(23,24,7,1,hair);r(35,24,7,1,hair);r(31,30,3,5,'#b58b69');r(29,38,9,mouth===2?4:mouth===1?2:1,'#6e4439');if(mouth===2)r(31,38,5,1,'#e2c8a5');if(id==='I'){r(22,26,9,1,'#514e45');r(34,26,9,1,'#514e45');r(30,28,5,1,'#514e45');r(28,36,11,2,hair)}if(id==='T'||id==='D'||id==='V'){r(15,9,35,9,coat);r(14,16,37,3,'#3e4b39');r(30,11,5,4,'#c3b681')}if(id==='N'){r(17,48,30,5,'#b87754');r(36,51,6,13,'#a2694b')}if(id==='S'){r(40,53,3,9,'#9f5e4b');r(37,56,9,3,'#9f5e4b')}}
 function soldier(x,y){sprite(x,y,'#667953','#474b3b');rect(x-8,y-30,17,6,'#55684d');rect(x-9,y-25,19,2,'#384d3a');rect(x-5,y-18,11,2,'#3d5140');line(x-8,y-14,x+7,y-6,'#343d33',3);rect(x+5,y-10,3,9,'#343d33')}
-function beginFilm(){filmElapsed=0;flashback=true;filmScene=0;filmTime=0;setMusic('aurora');$('skipFilm').hidden=false;$('filmHeading').hidden=false;talk('Aurora · Antes da partida',[
-speech('N','Noa · Na véspera','Naquela tarde, eu ainda pensava na aula do dia seguinte. Minha mãe guardava roupa do varal. Davi brincava na praça.'),
-speech('L','Lia · Sua mãe','Noa, traz seu irmão para dentro. Estão dizendo que os combates chegaram à estrada. Vamos ficar juntos.'),
-speech('N','Noa · Durante a madrugada','Primeiro ouvimos os motores. Depois, uma explosão perto da escola. Pela janela, vi um veículo e soldados entrando na rua.'),
-speech('V','Militar · Na rua','Esta via está sob controle militar! Área interditada! Afastem-se do cruzamento e procurem abrigo!'),
-speech('L','Lia · Dentro de casa','Fiquem longe da janela. Noa, pegue a água. Davi, segure minha mão. Não vamos nos separar.'),
-speech('N','Noa','A luz acabou. Esperamos junto à parede enquanto os tiros se aproximavam. Ninguém sabia se a nossa casa seria atingida.'),
-speech('L','Lia','A vizinha disse que estão saindo pela praça. Vamos até lá enquanto há passagem. Só o que conseguirmos carregar.'),
-speech('N','Noa · Ao amanhecer','Quando saímos, a escola estava fechada e havia fumaça sobre os telhados. Não estávamos viajando. Estávamos fugindo da guerra.')
-],endFilm,'N')}
-function endFilm(){flashback=false;$('presentCard').hidden=false;setTimeout(()=>$('presentCard').hidden=true,2600);dialog=null;$('dialogue').hidden=true;$('skipFilm').hidden=true;$('filmHeading').hidden=true;$('areaTag').hidden=false;filmTime=0;updateJournal();talk('Noa · Vila de Aurora',['Minha mãe e Davi estão esperando na praça. Preciso falar com ela antes de partirmos para a fronteira.'],null,'N')}
+function beginFilm(){filmElapsed=0;flashback=true;filmScene=0;filmTime=0;setMusic('aurora');$('filmHeading').hidden=false;playScene('flashback',[
+{face:'N',name:'Aurora · Na véspera',text:'Um dia comum, antes da guerra.',duration:4},
+{face:'L',name:'Lia',text:'Noa, traga seu irmão para dentro.',duration:4},
+{face:'N',name:'A invasão',text:'Motores. Depois, a primeira explosão.',duration:5},
+{face:'V',name:'Militar · Na rua',text:'Área interditada! Procurem abrigo!',duration:5},
+{face:'L',name:'Lia',text:'Longe da janela. Fiquem juntos!',duration:4},
+{face:'N',name:'A casa deixa de ser segura',text:'Os combates chegaram à nossa rua.',duration:4},
+{face:'L',name:'Lia',text:'Pela praça. Só o que conseguirmos carregar.',duration:5},
+{face:'N',name:'A partida',text:'Não era uma viagem. Era uma fuga.',duration:4}
+],endFilm)}
+function endFilm(){flashback=false;filmTime=0;$('filmHeading').hidden=true;$('areaTag').hidden=false;showTransition('DE VOLTA AO PRESENTE','Aurora · Na manhã seguinte',()=>updateJournal())}
 function impact(){if(!sound||!audio)return;const count=audio.sampleRate*.7,buffer=audio.createBuffer(1,count,audio.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<count;i++)data[i]=(Math.random()*2-1)*Math.exp(-i/(audio.sampleRate*.12))*.16;const src=audio.createBufferSource(),f=audio.createBiquadFilter();src.buffer=buffer;f.type='lowpass';f.frequency.value=220;src.connect(f);f.connect(audio.destination);src.start()}
 function drawFilm(){
 ctx.save();const intense=filmScene>=2,shake=intense&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?Math.sin(filmElapsed*22)*1.2:0;ctx.translate(shake,0);ground();
@@ -143,7 +163,7 @@ label(filmScene>=6?'A FAMÍLIA PROCURA UMA SAÍDA':'TROPAS ENTRAM EM AURORA',187
 ctx.restore();rect(0,0,W,28,'#17231f');rect(0,H-15,W,15,'#17231f');
 }
 
-function openBag(done){if(!(hasDocs||returned)){done?.();return}keys.clear();inspecting=true;inspectionDone=done||null;$('bagDialog').showModal();$('bagContext').textContent=bagScene==='checkpoint'?'CONTROLE DE FRONTEIRA · A pasta sobre a mesa de inspeção':'MEMÓRIAS DE CASA · Abra um dos objetos sobre a pasta';$('closeBag').textContent=bagScene==='checkpoint'?'Entregar documentos ao militar →':'Guardar a pasta →';showItem('overview')}
+function openBag(done){if(cinematic||transitioning)return;if(!(hasDocs||returned)){done?.();return}keys.clear();inspecting=true;inspectionDone=done||null;$('bagDialog').showModal();$('bagContext').textContent=bagScene==='checkpoint'?'CONTROLE DE FRONTEIRA · A pasta sobre a mesa de inspeção':'MEMÓRIAS DE CASA · Abra um dos objetos sobre a pasta';$('closeBag').textContent=bagScene==='checkpoint'?'Entregar documentos ao militar →':'Guardar a pasta →';showItem('overview')}
 function closeBag(){$('bagDialog').close();inspecting=false;bagScene='memories';const done=inspectionDone;inspectionDone=null;done?.();canvas.focus()}
 function showItem(item){
 const overview=item==='overview';$('bagDesk').hidden=!overview;$('backToFolder').hidden=overview;$('itemPanel').hidden=overview;$('bagArt').hidden=item!=='photo';
@@ -170,19 +190,45 @@ r(14,17,3,100,'#ffffff18');r(365,14,2,212,'#8d7e5c22');p.font='10px monospace';p
 
 function canMove(x,y){if(x<12||x>628||y<30||y>374)return false;const blocks=area?borderBlocks:villageBlocks;for(const b of blocks)if(x+6>b.x&&x-6<b.x+b.w&&y>b.y&&y-7<b.y+b.h)return false;if(area===1&&!checked&&x>290)return false;if(area===1&&x>180&&x<235&&(y<172||y>237))return false;return true}
 function update(dt){
-if(paused||$('infoModal').open||inspecting)return;
+if(paused||$('infoModal').open||inspecting||document.hidden)return;if(transitioning)return;if(cinematic){updateScene(dt);return;}
 if(document.hidden)return;if(flashback){filmTime+=dt;filmElapsed+=dt;$('filmHeading').textContent='FLASHBACK · AURORA · '+(filmScene<2?'NA VÉSPERA':'MADRUGADA DA INVASÃO');if(sound&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches&&filmScene>=2&&Math.floor(filmTime*2)!==lastLetter){lastLetter=Math.floor(filmTime*2);if(lastLetter%5===0)impact()}}
 if(dialog){typing+=dt;const n=Math.min(dialog.text.length,Math.floor(typing*34));if(n!==visibleChars){visibleChars=n;$('dialogueText').textContent=dialog.text.slice(0,n);if(n<dialog.text.length&&/[^\s.,!?…]/.test(dialog.text[n-1]||''))tone(170+activeFace.charCodeAt(0)*2,.025,.008)}drawFace(activeFace,n<dialog.text.length&&/[\p{L}\p{N}]/u.test(dialog.text[Math.max(0,n-1)]||'')?1+Math.floor(clock*12)%2:0);return}
 if(!started||ended||flashback)return;let dx=0,dy=0;if(keys.has('w')||keys.has('ArrowUp'))dy=-1;if(keys.has('s')||keys.has('ArrowDown'))dy=1;if(keys.has('a')||keys.has('ArrowLeft'))dx=-1;if(keys.has('d')||keys.has('ArrowRight'))dx=1;if(dx&&dy)dy=0;let speed=80*dt;if(dx||dy){player.walk+=dt;if(dx)player.dir=dx<0?1:2;else player.dir=dy<0?3:0;if(canMove(player.x+dx*speed,player.y))player.x+=dx*speed;if(canMove(player.x,player.y+dy*speed))player.y+=dy*speed;}else player.walk=0;
 if(dx||dy){trail.push({x:player.x,y:player.y,dir:player.dir});if(trail.length>45)trail.shift();if(area&&returned){for(let i=0;i<2;i++){const pos=trail[Math.max(0,trail.length-1-(i+1)*14)];if(pos&&canMove(pos.x,pos.y))family[i]={...pos}}}}
-let n=nearest();$('interaction').hidden=!n;if(n)$('interaction').querySelector('span').textContent=n.id==='water'?'Encher a cantil':n.id==='docs'?'Recolher documentos':n.id==='exit'?'Seguir para a fronteira':'Conversar';if(!area&&stage===3&&player.x>490&&player.x<551&&player.y<38)changeArea(1);}
-function draw(){if(flashback){drawFilm();return}ctx.clearRect(0,0,W,H);area?borderMap():village();if(!area&&stage===2&&!water){rect(291,218,7,10,'#6a7967');rect(293,216,3,3,'#b3b994');label('ÁGUA',260,251,'#e5dcba',6)}if(!area)sprite(353,252,'#8f6d5c','#514536',0,0,true);let characters=area?[borderNPC]:npcs;if(area&&returned)characters=[...characters,{...family[0],color:'#a86e57',hair:'#584337'},{...family[1],color:'#8f6d5c',hair:'#514536',child:true}];const chars=[...characters.map(n=>({...n,walk:0,dir:0})),{...player,color:'#bb9e63',hair:'#4a4236',isPlayer:true}].sort((a,b)=>a.y-b.y);for(const c of chars)sprite(c.x,c.y,c.color,c.hair,c.dir,c.walk,c.child);if(area){soldier(274,207);soldier(318,151);label('CONTROLE · AGUARDE',242,257);if(!checked){for(let x=291;x<357;x+=8)rect(x,177,6,5,x%16?'#c4ad76':'#5e634b');rect(292,179,3,53,'#626b52')}else label('PASSAGEM AUTORIZADA →',305,190,'#dfd1a4',6);label('ÁGUA / DESCANSO',390,263,'#d5d6b2',6)}else{soldier(536,137);label('ÁREA INTERDITADA',398,126,'#d6bb81',6)}const o=objective();if(!ended)marker(o.x,o.y);if(!area&&stage===3)label('↑ ROTA DO VALE',476,20,'#ead8a1',7);
+let n=nearest();$('interaction').hidden=!n;if(n)$('interaction').querySelector('span').textContent=n.id==='water'?'Encher a cantil':n.id==='docs'?'Recolher documentos':n.id==='exit'?'Seguir para a fronteira':'Conversar';if(!area&&stage===0&&Math.hypot(player.x-338,player.y-239)<46){meetFamily();return}if(!area&&stage===1&&hasDocs&&Math.hypot(player.x-338,player.y-239)<46){returnFamily();return}if(!area&&stage===2&&water&&Math.hypot(player.x-504,player.y-130)<40){confirmRoute();return}if(area&&!checked&&player.x>243){checkpointScene();return}if(area&&checked&&Math.hypot(player.x-473,player.y-165)<44){welcomeScene();return}if(!area&&stage===3&&player.x>490&&player.x<551&&player.y<38)changeArea(1);}
+function drawStoryActions(){
+const c=cinematic,p=c?Math.min(1,c.time/(c.steps[c.index].duration||4)):0;
+if(c?.kind==='photo'){rect(0,0,W,H,'#1c2e25cc');ctx.drawImage($('photoThumb'),155,64,330,220);label('UMA LEMBRANÇA QUE VEIO CONOSCO',187,311,'#e5d8af',8)}
+if(c?.kind==='water'){rect(278,215,9,13,'#647969');rect(280,212,5,3,'#c8cbb0');rect(280,226-8*p,5,Math.ceil(8*p),'#96b8ab');for(let i=0;i<3;i++)rect(274+i*3,208+(c.time*18+i*6)%12,1,3,'#afccbb')}
+if(c?.kind==='checkpoint'){
+rect(259,180,38,12,'#7f7153');rect(262,192,3,10,'#6b6248');rect(290,192,3,10,'#6b6248');
+const x=c.index===0?250:c.index===1?250+25*p:c.index===2?275:275-25*p;
+rect(x,179,12,9,'#bfa574');rect(x+2,177,9,8,'#e4dabc');rect(x+3,179,6,1,'#a9a48b');if(c.index===2){rect(279,173,3,4,'#d2b58b');label('LIA · NOA · DAVI',266,158,'#e5d8ae',6)}
+}
+if(dailyLife){
+// Mesmo abrigo, alguns dias depois: atividades em vez de uma explicação longa.
+rect(377,250,41,15,'#8d9f82');rect(379,251,10,10,'#d3d1b3');rect(420,250,40,15,'#84987d');rect(422,251,9,10,'#d3d1b3');crate(465,254);
+rect(496,215,42,20,'#5d745c');rect(493,213,48,3,'#a99e72');rect(498,235,3,12,'#8b805a');rect(531,235,3,12,'#8b805a');label('A B C',505,228,'#dfd9b2',7);
+for(const [i,x]of [480,500,522].entries())sprite(x,253+(i%2)*7,['#a68a66','#818f86','#ab7761'][i],'#554839',0,Math.sin(clock+i)>.8?clock:0,true);
+rect(543,182,24,37,'#a49976');rect(545,184,20,10,'#556e62');rect(548,198,10,3,'#d8cfad');rect(550,205,8,2,'#d8cfad');rect(549,176,2,9,'#5b6650');label('MENSAGENS',527,172,'#e7d8ac',6);
+if(c?.kind==='daily'){
+ if(c.index===0){rect(435+12*p,219,4,6,'#b8c9b5');rect(436+12*p,218,3,2,'#d9dfc6')}
+ if(c.index===1){rect(399+15*p,244,15,7,'#bda578');rect(400+15*p,242,12,3,'#dbcb9c')}
+ if(c.index===2){sprite(543,251,'#7f8b72','#6c5340');label('ESCOLA / ACOLHIMENTO',469,281,'#dbd5b2',6)}
+ if(c.index===3){rect(534,205,10,6,'#e4d5aa');rect(536,206,6,1,'#9c9f80');label('PARA MARA',516,238,'#e6dbb9',6)}
+ if(c.index===4){rect(430,248,11,8,'#e9ddbb');rect(432,249,7,4,'#93a77f')}
+ }
+}
+if(!area&&stage>=2){label('ROTA DO VALE ↑',462,83,'#e5d5a3',7);label('ESCOLA × INTERDITADA',66,182,'#dac38f',6)}
+}
+
+function draw(){if(flashback){drawFilm();return}ctx.clearRect(0,0,W,H);area?borderMap():village();if(!area&&stage===2&&!water){rect(291,218,7,10,'#6a7967');rect(293,216,3,3,'#b3b994');label('ÁGUA',260,251,'#e5dcba',6)}if(!area)sprite(353,252,'#8f6d5c','#514536',0,0,true);let characters=area?[borderNPC]:npcs;if(area&&returned)characters=[...characters,{...family[0],color:'#a86e57',hair:'#584337'},{...family[1],color:'#8f6d5c',hair:'#514536',child:true}];const chars=[...characters.map(n=>({...n,walk:n.walk||0,dir:n.dir||0})),{...player,color:'#bb9e63',hair:'#4a4236',isPlayer:true}].sort((a,b)=>a.y-b.y);for(const c of chars)sprite(c.x,c.y,c.color,c.hair,c.dir,c.walk,c.child);if(area){soldier(274,207);soldier(318,151);label('CONTROLE · AGUARDE',242,257);if(!checked){for(let x=291;x<357;x+=8)rect(x,177,6,5,x%16?'#c4ad76':'#5e634b');rect(292,179,3,53,'#626b52')}else label('PASSAGEM AUTORIZADA →',305,190,'#dfd1a4',6);label('ÁGUA / DESCANSO',390,263,'#d5d6b2',6)}else{soldier(536,137);label('ÁREA INTERDITADA',398,126,'#d6bb81',6)}drawStoryActions();const o=objective();if(!ended&&!cinematic&&!transitioning)marker(o.x,o.y);if(!area&&stage===3)label('↑ ROTA DO VALE',476,20,'#ead8a1',7);
 // Poeira sutil levada pelo vento.
 for(let i=0;i<13;i++){let x=(hash(i,20)*W+clock*5)%W,y=(hash(i,21)*H+Math.sin(clock*.4+i)*6)%H;rect(x,y,1,1,'#e5d7aa55')}
 }
 function loop(t){const dt=Math.min((t-last)/1000,.04);last=t;clock+=dt;update(dt);draw();requestAnimationFrame(loop)}
 function start(){started=true;$('startScreen').hidden=true;$('areaTag').hidden=true;canvas.focus();updateJournal();if(!sound)enableSound();beginFilm()}
-function togglePause(){if(!started||ended||dialog||flashback||inspecting)return;paused=!paused;keys.clear();$('paused').hidden=!paused;$('pause').textContent=paused?'▷':'Ⅱ';$('pause').setAttribute('aria-label',paused?'Continuar jogo':'Pausar jogo');if(paused)music.pause();else{if(sound)music.play().catch(()=>{});canvas.focus()}}
+function togglePause(){if(!started||ended||transitioning||inspecting)return;paused=!paused;keys.clear();$('paused').hidden=!paused;$('pause').textContent=paused?'▷':'Ⅱ';$('pause').setAttribute('aria-label',paused?'Continuar jogo':'Pausar jogo');if(paused)music.pause();else{if(sound)music.play().catch(()=>{});canvas.focus()}}
 function tone(freq,duration,volume=.025){if(!sound||!audio)return;const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(volume,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+duration)}
 const music=new FrontierMusic();music.loop=true;music.volume=.22;let musicKind='aurora',musicFade=null;
 function audioState(){$('sound').innerHTML='♪ <span>Som '+(sound?'ligado':'desligado')+'</span>';$('sound').setAttribute('aria-label',sound?'Desativar som':'Ativar som')}
@@ -192,16 +238,16 @@ $('sound').onclick=()=>{if(sound){sound=false;music.pause();audioState()}else en
 $('musicVolume').oninput=e=>{clearInterval(musicFade);music.volume=Number(e.target.value)/100};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)music.pause();else if(sound&&!paused)music.play().catch(()=>{})});
 
-$('start').onclick=start;$('nextDialogue').onclick=advance;$('touchInteract').onclick=interact;$('pause').onclick=togglePause;$('resume').onclick=togglePause;$('restart').onclick=()=>{area=0;stage=0;water=false;route=false;bagScene='memories';checked=false;trail=[];family[0]={x:338,y:239};family[1]={x:350,y:250};hasDocs=false;returned=false;ended=false;paused=false;dialog=null;player.x=305;player.y=286;player.dir=0;keys.clear();$('ending').hidden=true;$('location').textContent='Vila de Aurora';$('areaTag').innerHTML='VILA DE AURORA<span>Um lugar que já foi lar.</span>';for(let i=0;i<4;i++)$('q'+i).querySelector('.step').textContent=String(i+1).padStart(2,'0');start()};
-$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('viewport').requestFullscreen()}catch{modal('Tela ampliada','<p>Seu navegador não oferece tela cheia aqui. Você pode usar o zoom do navegador ou jogar normalmente nesta janela.</p>')}};
+$('start').onclick=start;$('nextDialogue').onclick=advance;$('touchInteract').onclick=interact;$('pause').onclick=togglePause;$('resume').onclick=togglePause;$('restart').onclick=()=>{area=0;stage=0;cinematic=null;transitioning=false;transitionDone=null;dailyLife=false;$('presentCard').hidden=true;$('paused').hidden=true;water=false;route=false;bagScene='memories';checked=false;trail=[];family[0]={x:338,y:239};family[1]={x:350,y:250};hasDocs=false;returned=false;ended=false;paused=false;dialog=null;player.x=305;player.y=286;player.dir=0;keys.clear();$('ending').hidden=true;$('location').textContent='Vila de Aurora';$('areaTag').innerHTML='VILA DE AURORA<span>Um lugar que já foi lar.</span>';for(let i=0;i<4;i++)$('q'+i).querySelector('.step').textContent=String(i+1).padStart(2,'0');start()};
+$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('gameColumn').requestFullscreen()}catch{modal('Tela ampliada','<p>Seu navegador não oferece tela cheia aqui. Você pode usar o zoom do navegador ou jogar normalmente nesta janela.</p>')}};
 function modal(title,html){keys.clear();if(started&&!paused&&!ended&&!dialog)togglePause();$('modalTitle').textContent=title;$('modalContent').innerHTML=html;$('infoModal').showModal()}
 $('about').onclick=()=>modal('Pessoas, lugares e recomeços.','<p>Um pequeno jogo educacional de Geografia sobre <strong>guerra, deslocamento populacional, fronteiras e busca por proteção</strong>.</p><p>Aurora e seus personagens são fictícios. A história trata de experiências vividas por milhões de pessoas, sem representar um conflito específico.</p><p>Feito em HTML, CSS e JavaScript, com arte original desenhada em Canvas. Sem combate, pontuação ou quiz.</p>');
-$('help').onclick=()=>{const hints=['Lia usa um casaco terracota e está no centro da vila, à direita do poço. Aproxime-se e pressione E.','A casa com varal fica no canto inferior esquerdo. Os documentos estão no chão, diante da porta. Depois leve-os a Lia.','Tomás usa verde e está perto do portão, no canto superior direito.','Siga ao norte pelo portão. No segundo mapa, atravesse a ponte para a direita e fale com Sara, de roupa clara.'];if(stage===2){modal('Preparar a caminhada','<p>'+(!water?'Vá ao poço no centro da praça e encha a cantil. Aproxime-se pela parte de baixo e pressione E.':!route?'Ivo está na estrada à esquerda da praça. Converse com ele sobre a rota.':'Tomás espera no portão a nordeste. Confirme a passagem com ele.')+'</p>');return}modal('Um passo de cada vez.','<p>'+((stage===1&&hasDocs)?'Volte até Lia na praça e entregue os documentos.':hints[Math.min(stage,3)])+'</p>')};
+$('help').onclick=()=>{const target=objective();const tips={lia:hasDocs?'Volte à praça com a pasta. A cena começa ao se aproximar da sua mãe.':'Aproxime-se de Lia, na praça, para começar a partida.',docs:'A pasta está no chão, diante da casa com varal, a sudoeste. Use E.',water:'Aproxime-se do poço pela parte de baixo e pressione E.',tomas:'Siga a estrada à direita da praça até o portão, a nordeste.',exit:'Suba pela passagem à direita de Tomás. A saída fica ao norte.',military:'Atravesse a ponte para leste. A abordagem começa ao se aproximar da barreira.',sara:'Continue a leste até Sara, de roupa clara, diante do posto.'};modal('Seu próximo passo','<p>'+tips[target.id]+'</p>')};
 for(const b of document.querySelectorAll('.close,.close-action'))b.onclick=()=>$('infoModal').close();
 const dirs={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'};for(const b of document.querySelectorAll('[data-dir]')){b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(dirs[b.dataset.dir])});for(const type of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(type,()=>keys.delete(dirs[b.dataset.dir]))}
-window.addEventListener('keydown',e=>{if($('infoModal').open||inspecting)return;const key=e.key.length===1?e.key.toLowerCase():e.key;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','e','w','a','s','d','Escape','Enter'].includes(key))e.preventDefault();if(key==='Escape'){togglePause();return}if(key==='e'||key==='Enter'||key===' '){if(!e.repeat){if(!started)start();else interact()}return}keys.add(key)});window.addEventListener('keyup',e=>keys.delete(e.key.length===1?e.key.toLowerCase():e.key));window.addEventListener('blur',()=>{keys.clear();if(started&&!paused&&!ended&&!dialog)togglePause()});document.addEventListener('visibilitychange',()=>{if(document.hidden)keys.clear()});
-$('inspectBag').onclick=()=>openBag();$('closeBag').onclick=closeBag;for(const b of document.querySelectorAll('[data-item]'))b.onclick=()=>showItem(b.dataset.item);
-$('backToFolder').onclick=()=>showItem('overview');$('skipFilm').onclick=endFilm;$('bagDialog').addEventListener('cancel',e=>{e.preventDefault();closeBag()});
+window.addEventListener('keydown',e=>{if($('infoModal').open||inspecting)return;const key=e.key.length===1?e.key.toLowerCase():e.key;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','e','w','a','s','d','Escape','Enter'].includes(key))e.preventDefault();if(key==='Escape'){togglePause();return}if(transitioning){if(key==='Enter'||key==='e'||key===' ')continueTransition();return}if(key==='e'||key==='Enter'||key===' '){if(!e.repeat){if(!started)start();else interact()}return}keys.add(key)});window.addEventListener('keyup',e=>keys.delete(e.key.length===1?e.key.toLowerCase():e.key));window.addEventListener('blur',()=>{keys.clear();if(started&&!paused&&!ended&&!dialog)togglePause()});document.addEventListener('visibilitychange',()=>{if(document.hidden)keys.clear()});
+$('inspectBag').onclick=()=>{if(!cinematic&&!transitioning)openBag()};$('closeBag').onclick=closeBag;for(const b of document.querySelectorAll('[data-item]'))b.onclick=()=>showItem(b.dataset.item);
+$('backToFolder').onclick=()=>showItem('overview');$('skipFilm').onclick=()=>{if(flashback)finishScene()};$('skipScene').onclick=()=>{if(!paused)finishScene()};$('continueTransition').onclick=continueTransition;$('bagDialog').addEventListener('cancel',e=>{e.preventDefault();closeBag()});
 $('sources').onclick=()=>modal('Relatos que orientaram a história',`<p>Personagens e cenas são fictícios. A pesquisa orientou os temas; não reproduzimos uma história real específica.</p><ul><li><a href="https://www.unhcr.ca/news/news-stories-2022-3-6229dc0f4-ukrainian-family-confronts-new-reality-life-refugees-html/" target="_blank" rel="noopener">ACNUR · Valentina e Irinia, Ucrânia (2022)</a>: explosões, fuga e acolhimento.</li><li><a href="https://www.acnur.org/br/noticias/comunicados-imprensa/finalmente-somos-livres" target="_blank" rel="noopener">ACNUR · Yusra Bakri e Khaled, Síria (2018)</a>: separação familiar e perda de documentos.</li><li><a href="https://www.doctorswithoutborders.ca/sudan-we-dont-know-where-we-can-go/" target="_blank" rel="noopener">MSF · Chira Casah e Dak Denj Uchol (2024)</a>: perda de contato e postos militares. Dak é identificada como retornada ao Sudão do Sul.</li></ul><p>A abordagem militar é ficcional; os procedimentos variam entre países. Carta e fotografia são criações para o jogo.</p><p>Trilhas: “Aurora” e “Vale”, composições instrumentais originais deste projeto. Pesquisa musical e referências no arquivo CREDITOS.md.</p>`);
 
 $('areaTag').hidden=true;requestAnimationFrame(loop);

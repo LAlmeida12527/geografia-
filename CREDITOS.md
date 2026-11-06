@@ -29,3 +29,7 @@ O pedido de proteção não depende de vencer o jogo ou possuir uma lembrança f
 As gravações pesquisadas (“Sadness”, “At the end of hope” e “Forget Me Not”, no OpenGameArt) NÃO estão incluídas. O ambiente não conseguiu baixar os arquivos; foram usadas composições originais para entregar áudio local funcional. Nenhuma gravação desses autores foi copiada.
 
 Fontes online opcionais: DM Sans e Libre Caslon Display, via Google Fonts. Fontes locais são usadas sem internet.
+
+## Versão com cenas automáticas
+
+A sequência de cotidiano (água, descanso, atividade para crianças e mensagem a uma familiar) é uma criação narrativa no mesmo abrigo temporário. Não pretende representar toda experiência de refúgio ou assegurar que todos esses serviços estejam disponíveis em qualquer contexto. Falas explicativas maiores ficaram opcionais para permitir uma apresentação oral acompanhando as imagens.

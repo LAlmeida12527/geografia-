@@ -1,21 +1,30 @@
-# Apresentação — cerca de 90 segundos
+# Apresentação com o jogo
 
-“Fronteira da Esperança é um pequeno jogo de Geografia feito em HTML, CSS e JavaScript, pronto para GitHub Pages.
+O percurso foi feito para mostrar situações enquanto você explica, sem exigir que a turma leia conversas longas. Dê preferência ao jogo em tela cheia, com música baixa. Use Esc para pausar quando precisar desenvolver uma ideia.
 
-Controlamos Noa, que foge de uma invasão com sua mãe Lia e seu irmão Davi. A introdução mostra a transformação da vila em um espaço de conflito: tropas ocupam ruas, acessos são interditados e a família precisa procurar abrigo e sair.
+## Durante a invasão
 
-A missão de recuperar uma pasta mostra o que as pessoas conseguem carregar. Há documentos, uma carta e uma fotografia. Os objetos são fictícios, mas foram escritos a partir de pesquisa sobre separação familiar, perda de documentos e deslocamento forçado.
+“Nosso jogo mostra como uma guerra transforma o território. As ruas são ocupadas, a escola deixa de funcionar e a família precisa sair de casa. Essa mudança interrompe a vida cotidiana.”
 
-Na passagem militar, perguntam de onde vêm e quem está com eles. Depois, a família chega a um posto de acolhimento. Cruzar uma fronteira não resolve tudo: é preciso receber informações, atendimento e orientação para buscar proteção.
+## Durante a preparação e a caminhada
 
-As referências estão disponíveis dentro do jogo e no arquivo de créditos. Consultamos relatos de Valentina e Irinia na Ucrânia, Yusra Bakri e Khaled na Síria e pessoas que fugiram da guerra no Sudão. São contextos diferentes, e não estamos reproduzindo uma história real específica.”
+“Noa busca a pasta e água. A família só pode carregar uma parte da vida que tinha. Como a estrada principal foi fechada, também precisa mudar de rota.”
 
-## Demonstração
+## Durante o controle da fronteira
 
-1. Mostre a invasão e os retratos com a boca acompanhando o texto.
-2. Recolha a pasta e abra cada objeto.
-3. Encha a cantil no poço e descubra a rota com Ivo. Explique a diferença entre deslocamento interno e travessia internacional.
-4. Mostre o controle militar e a liberação após a conversa.
-5. Conclua com o acolhimento e abra “Relatos reais e créditos”.
+“A fronteira marca a passagem para outro território e outra autoridade. A abordagem militar desta cena é fictícia, não um procedimento universal. Buscar proteção e obter reconhecimento como refugiado são etapas diferentes.”
 
-O som é opcional. Teste o volume do computador antes da apresentação. Se o navegador bloquear a música, clique em ♪.
+## Durante o cotidiano
+
+“Cruzar a fronteira não encerra todas as dificuldades. A família precisa de água, moradia, informação, escola e meios para retomar seus vínculos. Aqui mostramos um abrigo temporário; nem toda pessoa refugiada vive em abrigo ou campo.”
+
+## Ao terminar
+
+“Aurora e os personagens são fictícios. Consultamos relatos publicados pelo ACNUR e por Médicos Sem Fronteiras para orientar os temas, sem reproduzir uma história real específica. As referências estão no jogo e nos créditos.”
+
+## Antes da aula
+
+- Teste som, tela cheia e controles no computador da apresentação.
+- As cenas avançam sozinhas. É possível pausá-las ou pulá-las.
+- “De volta ao presente” e “Alguns dias depois” aguardam seu clique em Continuar.
+- Carta, documentos, fotografia ampliada e conversa com Ivo são complementos opcionais.

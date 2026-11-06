@@ -1,19 +1,23 @@
-const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const elements=new Map();function element(id){if(!elements.has(id)){const e={hidden:true,textContent:'',innerHTML:'',className:'',style:{},open:false,focus(){},setAttribute(){},addEventListener(){},querySelector(s){return element(id+s)},showModal(){this.open=true},close(){this.open=false},getContext(){return new Proxy({},{get(t,k){return t[k]||(()=>{})},set(t,k,v){t[k]=v;return true}})}};elements.set(id,e)}return elements.get(id)}
-class AudioMock{constructor(){this.volume=.2}play(){return Promise.resolve()}pause(){}}
-const sandbox={Audio:AudioMock,FrontierMusic:AudioMock,document:{getElementById:element,querySelectorAll:()=>[],addEventListener(){},hidden:false},window:{addEventListener(){}},requestAnimationFrame(){},setTimeout(){},setInterval(){},clearInterval(){},console};
-let code=fs.readFileSync(require('path').join(__dirname,'..','game.js'),'utf8');code=code.replace(/\}\)\(\);\s*$/,`globalThis.test={start,interact,advance,canMove,draw,update,player,objective,closeBag,showItem,endFilm,drawFace,getState:()=>({area,stage,hasDocs,returned,ended,dialog,checked,flashback,visibleChars,inspecting,water,route})};})();`);vm.runInNewContext(code,sandbox);let t=sandbox.test;
-function finish(){let safe=100;while((t.getState().dialog||t.getState().inspecting)&&safe--){if(t.getState().inspecting){for(const item of ['documents','letter','photo'])t.showItem(item);t.closeBag()}else{t.update(.04);t.draw();t.advance()}}assert(safe>0)}
-function reach(target){const p=t.player,step=4,sx=Math.round(p.x/step),sy=Math.round(p.y/step),q=[[sx,sy]],seen=new Set([sx+','+sy]);let found;for(let i=0;i<q.length;i++){const [x,y]=q[i];if(Math.hypot(x*step-target.x,y*step-target.y)<20){found={x:x*step,y:y*step};break}for(const [dx,dy]of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(!seen.has(k)&&t.canMove(nx*step,ny*step)){seen.add(k);q.push([nx,ny])}}}assert(found,'Objetivo inacessível: '+JSON.stringify(target));p.x=found.x;p.y=found.y}
-t.draw();t.start();assert(t.getState().flashback);t.update(.1);assert(t.getState().visibleChars>0);const index=t.getState().dialog.index;t.advance();assert.equal(t.getState().dialog.index,index,'Primeiro toque deve revelar a frase');finish();assert(!t.getState().flashback);assert.equal(t.getState().stage,0);
-reach(t.objective());t.interact();finish();assert.equal(t.getState().stage,1);
-reach(t.objective());t.interact();assert(t.getState().inspecting);finish();assert(t.getState().hasDocs);
-reach(t.objective());t.interact();finish();assert.equal(t.getState().stage,2);assert(t.getState().returned);
-reach(t.objective());t.interact();finish();assert(t.getState().water);assert.equal(t.getState().stage,2);reach(t.objective());t.interact();finish();assert(t.getState().route);assert.equal(t.getState().stage,2);reach(t.objective());t.interact();finish();assert.equal(t.getState().stage,3);
-reach(t.objective());t.interact();finish();assert.equal(t.getState().area,1);assert(!t.canMove(310,210),'Barreira deve bloquear antes da identificação');
-reach(t.objective());t.interact();finish();assert(t.getState().checked,'Conversa e inspeção precisam liberar barreira');assert(t.canMove(310,210));
-reach(t.objective());t.interact();finish();assert(t.getState().ended);assert.equal(element('ending').hidden,false);
-element('restart').onclick();finish();assert.equal(t.getState().stage,0);assert.equal(t.getState().area,0);assert(!t.getState().ended);assert(!t.getState().checked);assert(!t.getState().water);assert(!t.getState().route);
-element('restart').onclick();t.endFilm();finish();assert(!t.getState().flashback);
-for(const id of ['N','L','I','T','D','S','V'])for(let mouth=0;mouth<3;mouth++)t.drawFace(id,mouth);
-console.log('PASS: flashback completo e pulável; digitação e avanço; 21 estados de retratos; água coletada; rota descoberta; pasta e 3 objetos; rota acessível com colisões; barreira bloqueada antes do controle; conferência militar; final e reinício.');
+// Teste de percurso e estados. Não requer servidor; não substitui revisão visual.
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),path=require('path');
+const nodes=new Map(),listeners={};
+function el(id){if(!nodes.has(id))nodes.set(id,{hidden:true,textContent:'',innerHTML:'',className:'',style:{},open:false,focus(){},setAttribute(){},addEventListener(type,fn){listeners[id+':'+type]=fn},querySelector(s){return el(id+s)},showModal(){this.open=true},close(){this.open=false},getContext(){return new Proxy({},{get(t,k){return t[k]||(()=>{})},set(t,k,v){t[k]=v;return true}})}});return nodes.get(id)}
+class Music{play(){return Promise.resolve()}pause(){}}
+const sandbox={FrontierMusic:Music,document:{getElementById:el,querySelectorAll:()=>[],addEventListener(){},hidden:false},window:{addEventListener(){},matchMedia:()=>({matches:false})},requestAnimationFrame(){},setTimeout(){},setInterval(){},clearInterval(){},console};
+let src=fs.readFileSync(path.join(__dirname,'..','game.js'),'utf8').replace(/\}\)\(\);\s*$/,`globalThis.test={start,update,draw,interact,advance,player,canMove,objective,nextScene,finishScene,continueTransition,togglePause,openBag,closeBag,showItem,keys,get:()=>({stage,area,cinematic,transitioning,dialog,water,checked,hasDocs,returned,ended,flashback,dailyLife,paused})};})();`);vm.runInNewContext(src,sandbox);const t=sandbox.test;
+function scene(){let n=0;while(t.get().cinematic&&n++<3000){t.update(.04);t.draw()}assert(n<3000,'Cena deve terminar sem pressionar E')}
+function reach(target){const q=[[Math.round(t.player.x/4),Math.round(t.player.y/4)]],seen=new Set(q[0].join(','));let found;for(let i=0;i<q.length;i++){const[x,y]=q[i];if(Math.hypot(x*4-target.x,y*4-target.y)<18){found={x:x*4,y:y*4};break}for(const[dx,dy]of [[1,0],[-1,0],[0,1],[0,-1]]){let nx=x+dx,ny=y+dy,k=nx+','+ny;if(!seen.has(k)&&t.canMove(nx*4,ny*4)){seen.add(k);q.push([nx,ny])}}}assert(found,'Objetivo inacessível '+target.id);Object.assign(t.player,found)}
+function approach(){reach(t.objective());t.update(.04)}
+t.draw();t.start();assert(t.get().cinematic);t.togglePause();const frozen=t.get().cinematic.time;t.update(2);assert.equal(t.get().cinematic.time,frozen);t.togglePause();scene();assert(t.get().transitioning);assert(!t.get().dialog);assert(!t.get().cinematic);assert(el('dialogue').hidden);const pos=t.player.x;t.keys.add('d');t.update(2);assert.equal(t.player.x,pos);t.continueTransition();assert(!t.get().transitioning);assert(!t.get().dialog);
+approach();assert(t.get().cinematic);scene();assert.equal(t.get().stage,1);
+approach();t.interact();assert(t.get().hasDocs);scene();assert(!el('bagDialog').open,'Pasta detalhada deve ser opcional');t.openBag();for(const item of ['overview','documents','letter','photo'])t.showItem(item);t.closeBag();
+approach();scene();assert.equal(t.get().stage,2);
+approach();t.interact();scene();assert(t.get().water);
+approach();assert(t.get().cinematic);scene();assert.equal(t.get().stage,3);
+approach();t.interact();assert.equal(t.get().area,1);assert(!t.get().dialog);
+approach();assert(t.get().cinematic);assert(!t.canMove(310,210));scene();assert(t.get().checked);assert(t.canMove(310,210));
+approach();scene();assert(t.get().transitioning);assert(!t.get().ended);t.continueTransition();assert(t.get().dailyLife);scene();assert(t.get().ended);assert(!el('ending').hidden);
+el('restart').onclick();assert(!t.get().ended);assert(!t.get().water);assert(!t.get().checked);assert(!t.get().dailyLife);t.finishScene();assert(t.get().transitioning);t.continueTransition();assert.equal(t.get().stage,0);
+// Ivo não é necessário para avançar: as explicações ficam opcionais.
+Object.assign(t.player,{x:229,y:288});t.interact();assert(t.get().dialog);while(t.get().dialog)t.advance();assert(!t.get().cinematic);
+console.log('PASS: cenas automáticas; pausa; transição exclusiva e bloqueio de movimento; objetivos alcançáveis; pasta opcional; preparação sem conversa obrigatória com Ivo; fronteira automática; cotidiano e final; reinício e pulo.');
