@@ -9,11 +9,12 @@ O percurso principal prioriza **animações e ações**, com poucas legendas cur
 - Invasão em um flashback identificado de aproximadamente 86 segundos, com apresentação da família e planos mais longos, com tropas, moradores procurando abrigo e a saída da família.
 - Transição exclusiva “De volta ao presente”, com um botão Continuar. Nenhum diálogo aparece por cima dela.
 - Exploração para recolher a pasta e buscar água. A família e o militar iniciam suas cenas ao se aproximar.
+- Travessia pela estrada, com pausa para Davi beber água e o posto aparecendo ao longe.
 - Controle da fronteira animado: a pasta é entregue, conferida e devolvida; a barreira é liberada.
-- Sequência “Alguns dias depois”: água, organização de um espaço de descanso, atividade para Davi e tentativa de contato com Mara.
+- Pátio próprio após “Alguns dias depois”, com duas ações jogáveis: organizar a bagagem e enviar uma mensagem para Mara. Davi participa de uma atividade, Lia procura informações e a família se reúne no fim do dia.
 - Falas e retratos em uma faixa abaixo da imagem; a caixa não cobre os personagens.
 
-Tempo estimado do percurso: **5–7 minutos**, dependendo da exploração e das pausas. As conversas opcionais podem alongar a experiência. Sem combate, pontuação ou sistemas de fome e dinheiro.
+Tempo estimado do percurso: **6–9 minutos**, dependendo da exploração e das pausas. As conversas opcionais podem alongar a experiência. Sem combate, pontuação ou sistemas de fome e dinheiro.
 
 ## Jogar
 
@@ -40,10 +41,13 @@ As trilhas originais são geradas no navegador. Não dependem de baixar gravaç�
 5. Volte à praça e aproxime-se de Lia.
 6. Vá ao poço pela parte de baixo e pressione E para encher a cantil.
 7. Siga a placa ao norte e aproxime-se de Tomás no portão a nordeste. Falar com Ivo não é obrigatório.
-8. Suba pela saída à direita de Tomás.
+8. Suba pela saída à direita de Tomás. A cena mostra a partida, a caminhada e uma pausa para beber água.
 9. Atravesse a ponte. Ao chegar à barreira, a abordagem militar ocorre automaticamente. Aguarde ou pule a sequência para liberar a passagem.
 10. Continue a leste até Sara. Após o acolhimento, a tela “Alguns dias depois” aguarda seu comando.
-11. Assista ao cotidiano da família para chegar ao encerramento.
+11. No pátio do abrigo, leve a bagagem ao espaço indicado no canto inferior esquerdo. Pressione E para organizá-la.
+12. Acompanhe Davi até as outras crianças e Lia até o quadro de informações.
+13. Vá ao ponto de comunicação no canto inferior direito e pressione E para enviar uma mensagem a Mara.
+14. A mensagem fica aguardando resposta. A família volta ao espaço de descanso para o encerramento.
 
 ## Publicar no GitHub Pages
 
@@ -58,7 +62,7 @@ Os arquivos já estão no repositório `LAlmeida12527/geografia-`. Em outro repo
 - `APRESENTACAO.md`: sugestão de fala para o professor.
 - `tests/mission.cjs`: teste de lógica opcional, executável com `node tests/mission.cjs`.
 
-Os testes verificam cenas automáticas e puláveis, pausa, transições sem sobreposição, alcance dos objetivos, pasta opcional, barreira e reinício. Usam DOM e Canvas simulados, sem substituir revisão visual e sonora no navegador.
+Os testes verificam cenas automáticas e puláveis, pausa, transições sem sobreposição, alcance dos objetivos, pasta opcional, barreira e reinício. Verificam também continuidade dos movimentos, caminhos animados sem colisões e os dois objetivos no pátio. Usam DOM e Canvas simulados, sem substituir revisão visual e sonora no navegador.
 
 A chegada significa acolhimento inicial, não reconhecimento automático do pedido de refúgio. O abrigo temporário é uma situação específica da ficção; pessoas refugiadas também reconstroem suas vidas em bairros e cidades. O jogo não coleta dados. Recarregar a página reinicia a jornada.
 

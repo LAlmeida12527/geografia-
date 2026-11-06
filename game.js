@@ -6,7 +6,7 @@ ctx.imageSmoothingEnabled=false;
 const W=640,H=384,keys=new Set();
 let started=false,paused=false,ended=false,area=0,stage=0,hasDocs=false,returned=false,dialog=null,last=0,clock=0,sound=false,audio=null,musicTimer=null;
 let flashback=false,filmScene=0,filmTime=0,checked=false,inspecting=false,inspectionDone=null,typing=0,visibleChars=0,activeFace='N',lastLetter=-1;
-let cinematic=null,transitioning=false,transitionDone=null,dailyLife=false;let water=false,route=false,bagScene='memories',filmElapsed=0;let trail=[];const family=[{x:338,y:239},{x:350,y:250}];
+let journeyWalking=false,gateOpen=0,restOrganized=false,messageSent=false,bagCarried=false,familyFollows=true;let cinematic=null,transitioning=false,transitionDone=null,dailyLife=false;let water=false,route=false,bagScene='memories',filmElapsed=0;let trail=[];const family=[{x:338,y:239},{x:350,y:250}];
 const player={x:305,y:286,dir:0,walk:0};
 const colors={ground:'#858567',road:'#b2a382',grass:'#717e55',dark:'#3e4c3d',cream:'#ded1a5'};
 const npcs=[{id:'lia',name:'Lia · Moradora de Aurora',x:338,y:239,color:'#a86e57',hair:'#584337',initial:'L'},{id:'ivo',name:'Ivo · Professor da vila',x:229,y:288,color:'#7c8892',hair:'#c4c0a0',initial:'I'},{id:'tomas',name:'Tomás · Militar da passagem',x:504,y:130,color:'#667953',hair:'#474b3b',initial:'T'}];
@@ -46,7 +46,7 @@ function borderMap(){ground(true);rect(0,0,185,149,'#6e7d59');rect(0,255,180,129
 // Leito do rio e ponte de pedra.
 rect(190,0,37,162,'#586f68');rect(190,243,37,141,'#586f68');for(let y=0;y<384;y+=13){rect(195,y,17,2,'#78928a');rect(213,y+6,10,1,'#859b8b')}for(let y=0;y<150;y+=18){rect(184,y,8,15,'#8e9275');rect(226,y,7,15,'#899071')}rect(182,155,54,9,'#74775f');rect(182,240,54,9,'#74775f');rect(184,154,50,4,'#bbb494');rect(184,239,50,4,'#bbb494');for(let x=185;x<237;x+=15){rect(x,148,5,15,'#c5b996');rect(x,234,5,15,'#c5b996')}
 house(371,56,162,85,'#7d8b6b');rect(431,102,28,17,'#ede6c6');rect(442,103,6,14,'#a36e57');rect(438,107,14,5,'#a36e57');label('ACOLHIMENTO',410,92,'#e9e3c4',7);sandbag(284,137,50);sandbag(285,251,50);fence(280,26,3);for(let y=27;y<135;y+=14){rect(281,y,2,11,'#606f51');line(281,y,350,y+10,'#68795b')}
-rect(351,273,160,51,'#d1c7a0');for(let i=0;i<8;i++){rect(351+i*20,273,10,50,i%2?'#bbb894':'#cecca8')}rect(349,268,164,5,'#8d9271');rect(349,319,164,5,'#727d60');rect(349,268,3,59,'#697659');rect(510,268,3,59,'#697659');rect(417,283,26,40,'#747e62');bench(392,239);crate(540,130);crate(548,148);crate(333,294);tree(590,90);tree(567,299);tree(528,355);lamp(355,180);lamp(546,240);rect(294,163,4,52,'#5b674e');rect(294,162,62,6,'#d1bf8c');for(let x=298;x<356;x+=13)rect(x,163,6,5,'#8d7252');label('POSTO DO VALE',390,44,'#e8dcaf',8);label('← AURORA',38,251,'#dfd3a9',7);
+rect(351,273,160,51,'#d1c7a0');for(let i=0;i<8;i++){rect(351+i*20,273,10,50,i%2?'#bbb894':'#cecca8')}rect(349,268,164,5,'#8d9271');rect(349,319,164,5,'#727d60');rect(349,268,3,59,'#697659');rect(510,268,3,59,'#697659');rect(417,283,26,40,'#747e62');bench(392,239);crate(540,130);crate(548,148);crate(333,294);tree(590,90);tree(567,299);tree(528,355);lamp(355,180);lamp(546,240);label('POSTO DO VALE',390,44,'#e8dcaf',8);label('← AURORA',38,251,'#dfd3a9',7);
 // Pessoas esperando atendimento.
 sprite(443,226,'#a28259','#554839',0,0);sprite(460,233,'#8f6d5c','#514536',0,0,true);sprite(510,204,'#7a8b7b','#b9ac8c',0,0);
 }
@@ -56,9 +56,9 @@ rect(x-4,y-9,4,8+step,'#3d4540');rect(x+2,y-9,4,8-step,'#3d4540');rect(x-5,y-2+s
 if(coat==='#bb9e63'){rect(x-6,y-18-bob,12,3,'#b87754');line(x+5,y-17-bob,x-3,y-7-bob,'#6a6247',2);rect(x-7,y-11-bob,6,7,'#796b49');rect(x-7,y-11-bob,6,2,'#9e8a5a')}
 if(child)ctx.restore();}
 function marker(x,y){let b=Math.sin(clock*3)*2;rect(x-5,y-49+b,10,12,'#293b2a');rect(x-4,y-50+b,8,11,'#e0c481');rect(x-1,y-48+b,2,5,'#6c6445');rect(x-1,y-42+b,2,2,'#6c6445');rect(x-2,y-38+b,4,2,'#e0c481')}
-function objective(){if(area&&!checked)return {x:274,y:207,id:'military'};if(area)return {x:473,y:165,id:'sara'};if(stage===0)return npcs[0];if(stage===1)return hasDocs?npcs[0]:{x:130,y:336,id:'docs'};if(stage===2){if(!water)return{x:278,y:232,id:'water'};if(!route)return npcs[1];return npcs[2]}return{x:520,y:18,id:'exit'}}
-function nearest(){const entities=area?[borderNPC,{id:'military',name:'Sargento Duarte · Controle de fronteira',x:274,y:207}]:[...npcs,...(stage===2&&!water?[{id:'water',x:278,y:232}]:[]),...(stage===1&&!hasDocs?[{id:'docs',x:130,y:336}]:[]),{id:'exit',x:520,y:18}];let best=null,dist=40;for(const n of entities){const d=Math.hypot(n.x-player.x,n.y-player.y);if(d<dist){dist=d;best=n}}return best}
-function updateJournal(){ $('preparation').textContent='PREPARAÇÃO · '+(water?'✓ Água':'○ Água')+' / '+(route?'✓ Rota':'↑ Rota do vale');let current=Math.min(stage,3);for(let i=0;i<4;i++){$('q'+i).className=ended||i<current?'done':i===current?'active':'';if(ended||i<current)$('q'+i).querySelector('.step').textContent='✓'}$('progressCount').textContent=ended?'04 / 04':String(current+1).padStart(2,'0')+' / 04';$('inspectBag').disabled=!!cinematic||transitioning||!(hasDocs||returned);$('inventoryText').innerHTML=hasDocs?'Documentos da família<small>Memórias de uma vida em Aurora.</small>':returned?'Documentos entregues<small>A família está pronta para partir.</small>':'Um pouco de coragem.<small>E espaço para o essencial.</small>';const goals=['Encontre sua mãe na praça, perto da mala.','Busque os documentos na entrada da casa a sudoeste.',!water?'Encha a cantil no poço para a caminhada.':'Siga a placa ao norte e encontre Tomás no portão.',area&&!checked?'Apresente a pasta ao militar, antes da barreira.':area?'Procure Sara na entrada do posto de acolhimento.':'Siga ao norte pelo portão, rumo à fronteira.'];$('gameStatus').textContent=ended?'Jornada concluída · Um novo começo':goals[current];if(stage===1&&hasDocs)$('gameStatus').textContent='Leve os documentos de volta para Lia.';if(dailyLife&&!ended)$('gameStatus').textContent='Cenas do cotidiano · Recomeçar leva tempo.';}
+function objective(){if(area===2)return !restOrganized?{id:'rest',x:184,y:279}:{id:'message',x:484,y:283};if(area&&!checked)return {x:274,y:207,id:'military'};if(area)return {x:473,y:165,id:'sara'};if(stage===0)return npcs[0];if(stage===1)return hasDocs?npcs[0]:{x:130,y:336,id:'docs'};if(stage===2){if(!water)return{x:278,y:232,id:'water'};if(!route)return npcs[1];return npcs[2]}return{x:520,y:18,id:'exit'}}
+function nearest(){const entities=area===2?[{id:'rest',x:184,y:279},{id:'message',x:484,y:283},{id:'services',x:311,y:156},{id:'waterpoint',x:144,y:166},{id:'activity',x:429,y:196}]:area?[borderNPC,{id:'military',name:'Sargento Duarte · Controle de fronteira',x:274,y:207}]:[...npcs,...(stage===2&&!water?[{id:'water',x:278,y:232}]:[]),...(stage===1&&!hasDocs?[{id:'docs',x:130,y:336}]:[]),{id:'exit',x:520,y:18}];let best=null,dist=40;for(const n of entities){const d=Math.hypot(n.x-player.x,n.y-player.y);if(d<dist){dist=d;best=n}}return best}
+function updateJournal(){ $('preparation').textContent='PREPARAÇÃO · '+(water?'✓ Água':'○ Água')+' / '+(route?'✓ Rota':'↑ Rota do vale');let current=Math.min(stage,3);for(let i=0;i<4;i++){$('q'+i).className=ended||i<current?'done':i===current?'active':'';if(ended||i<current)$('q'+i).querySelector('.step').textContent='✓'}$('progressCount').textContent=ended?'04 / 04':String(current+1).padStart(2,'0')+' / 04';$('inspectBag').disabled=!!cinematic||transitioning||!(hasDocs||returned);$('inventoryText').innerHTML=hasDocs?'Documentos da família<small>Memórias de uma vida em Aurora.</small>':returned?'Pasta da família<small>Documentos e lembranças preservados.</small>':'Um pouco de coragem.<small>E espaço para o essencial.</small>';const goals=['Encontre sua mãe na praça, perto da mala.','Busque os documentos na entrada da casa a sudoeste.',!water?'Encha a cantil no poço para a caminhada.':'Siga a placa ao norte e encontre Tomás no portão.',area&&!checked?'Apresente a pasta ao militar, antes da barreira.':area?'Procure Sara na entrada do posto de acolhimento.':'Siga ao norte pelo portão, rumo à fronteira.'];$('gameStatus').textContent=ended?'Jornada concluída · Um novo começo':goals[current];if(stage===1&&hasDocs)$('gameStatus').textContent='Leve os documentos de volta para Lia.';if(dailyLife&&!ended){$('gameStatus').textContent=!restOrganized?'Leve a bagagem ao espaço de descanso.':'Envie uma mensagem para Mara no ponto de comunicação.';$('preparation').textContent='RECOMEÇO · '+(restOrganized?'✓ Pertences organizados':'○ Organizar pertences')+' / '+(messageSent?'✓ Mensagem enviada':'○ Contatar Mara');$('q3').querySelector('p').textContent=!restOrganized?'Organize a bagagem da família.':'Deixe uma mensagem para Mara.';}}
 function talk(name,lines,complete,initial){if(cinematic||transitioning)return;$('dockIdle').hidden=true;keys.clear();dialog={name,lines,index:0,complete};activeFace=initial||name[0];$('dialogue').hidden=false;$('interaction').hidden=true;showLine()}
 function showLine(){const entry=dialog.lines[dialog.index];const text=typeof entry==='string'?entry:entry.text;activeFace=typeof entry==='string'?activeFace:(entry.face||activeFace);$('speaker').textContent=typeof entry==='string'?dialog.name:(entry.name||dialog.name);dialog.text=text;typing=0;visibleChars=0;$('dialogueText').textContent='';$('nextDialogue').innerHTML=(dialog.index===dialog.lines.length-1?'Concluir':'Continuar')+' <kbd>E ↵</kbd>';if(flashback){filmScene=dialog.index;filmTime=0;if(filmScene===2||filmScene===3)impact()}drawFace(activeFace,0)}
 function advance(){if(paused)return;if(cinematic){nextScene();return}if(transitioning){continueTransition();return}if(!dialog||inspecting||$('infoModal').open)return;if(visibleChars<dialog.text.length){typing=dialog.text.length/34;visibleChars=dialog.text.length;$('dialogueText').textContent=dialog.text;drawFace(activeFace,0);return}dialog.index++;if(dialog.index<dialog.lines.length)showLine();else{const cb=dialog.complete;dialog=null;$('dialogue').hidden=true;$('dockIdle').hidden=false;cb?.();updateJournal();canvas.focus()}}
@@ -67,17 +67,27 @@ function playScene(kind,steps,complete){
  keys.clear();player.walk=0;dialog=null;$('dialogue').hidden=false;$('interaction').hidden=true;$('dockIdle').hidden=true;$('nextDialogue').textContent='Próxima cena →';
  cinematic={kind,steps,index:0,time:0,elapsed:0,complete};$('skipScene').hidden=false;$('scenePace').hidden=false;showSceneStep();updateJournal();
 }
-function showSceneStep(){const step=cinematic.steps[cinematic.index];activeFace=step.face||'N';$('speaker').textContent=step.name||'';$('dialogueText').textContent=step.text||'';drawFace(activeFace,0);$('scenePace').textContent=(cinematic.kind==='flashback'?'FLASHBACK · RITMO TRANQUILO':'CENA AUTOMÁTICA')+' · '+(cinematic.index+1)+' / '+cinematic.steps.length+' · Esc pausa';if(cinematic.kind==='flashback'){filmScene=cinematic.index;filmTime=0;if(filmScene===2)impact()}}
-function nextScene(){if(!cinematic||paused)return;const current=cinematic;current.index++;current.time=0;if(current.index<current.steps.length)showSceneStep();else finishScene()}
-function finishScene(){if(!cinematic)return;const done=cinematic.complete;cinematic=null;keys.clear();$('dialogue').hidden=true;$('dockIdle').hidden=false;$('skipScene').hidden=true;$('scenePace').hidden=true;done?.();updateJournal();canvas.focus()}
-function updateScene(dt){const c=cinematic;c.time+=dt;c.elapsed+=dt;const step=c.steps[c.index],p=Math.min(1,c.time/(step.duration||4));if(c.kind==='flashback'){filmTime=c.time;filmElapsed=c.elapsed;$('filmHeading').textContent='FLASHBACK · '+(c.index<2?'ANTES DA GUERRA':c.index<6?'MADRUGADA DA INVASÃO':'A FAMÍLIA PRECISA PARTIR')}
-if(c.kind==='checkpoint'){player.x=254;player.y=220;family[0]={x:245,y:202};family[1]={x:231,y:218};}
-if(c.kind==='welcome'){player.x=466;player.y=196;family[0]={x:443,y:191};family[1]={x:426,y:204};}
-if(c.kind==='daily'){if(c.index===4){player.x=443;player.y=240;family[0]={x:408,y:240};family[1]={x:425,y:239}}if(c.index===0){family[0]={x:440,y:220};family[1]={x:425+22*p,y:235}}if(c.index===1){player.x=426;player.y=238;family[0]={x:408,y:240};family[1]={x:425,y:239}}if(c.index===2){family[1]={x:450+58*p,y:245};}if(c.index===3){player.x=530;player.y=220;}}
-const speaking=step.text&&c.time<Math.min(2.5,(step.text.length/32));drawFace(activeFace,speaking?1+Math.floor(clock*10)%2:0);
-if(c.kind==='daily')family[1].walk=(c.index===0||c.index===2)?c.time:0;if(c.time>=(step.duration||4))nextScene();}
+function showSceneStep(){const step=cinematic.steps[cinematic.index];initTracks(step);activeFace=step.face||'N';$('speaker').textContent=step.name||'';$('dialogueText').textContent=step.text||'';drawFace(activeFace,0);$('scenePace').textContent=(cinematic.kind==='flashback'?'FLASHBACK · RITMO TRANQUILO':'CENA AUTOMÁTICA')+' · '+(cinematic.index+1)+' / '+cinematic.steps.length+' · Esc pausa';if(cinematic.kind==='flashback'){filmScene=cinematic.index;filmTime=0;if(filmScene===2)impact()}}
+function nextScene(){if(!cinematic||paused)return;finishTracks();const current=cinematic;current.index++;current.time=0;if(current.index<current.steps.length)showSceneStep();else finishScene()}
+function finishScene(){if(!cinematic)return;finishTracks();const done=cinematic.complete;cinematic=null;keys.clear();$('dialogue').hidden=true;$('dockIdle').hidden=false;$('skipScene').hidden=true;$('scenePace').hidden=true;done?.();updateJournal();canvas.focus()}
+// Caminhos explícitos para os personagens caminharem sem mudar de posição entre os planos.
+function actorFor(id){return id==='noa'?player:id==='lia'?family[0]:id==='davi'?family[1]:borderNPC}
+function initTracks(step){cinematic.tracks=(step.tracks||[]).map(t=>({...t,index:0}));}
+function moveTracks(dt){for(const t of cinematic.tracks||[]){const a=actorFor(t.actor),target=t.points[t.index];if(!target){a.walk=0;continue}const dx=target[0]-a.x,dy=target[1]-a.y,d=Math.hypot(dx,dy),speed=t.speed||42,amount=speed*dt;if(d<=amount){a.x=target[0];a.y=target[1];t.index++;a.walk=0}else{a.x+=dx/d*amount;a.y+=dy/d*amount;a.dir=Math.abs(dx)>Math.abs(dy)?dx<0?1:2:dy<0?3:0;a.walk=(a.walk||0)+dt}}}
+function finishTracks(){for(const t of cinematic?.tracks||[]){const end=t.points.at(-1);if(end)Object.assign(actorFor(t.actor),{x:end[0],y:end[1],walk:0});t.index=t.points.length}}
+function tracksDone(){return(cinematic.tracks||[]).every(t=>t.index>=t.points.length)}
+function updateScene(dt){const c=cinematic;c.time+=dt;c.elapsed+=dt;const step=c.steps[c.index];moveTracks(dt);
+if(c.kind==='flashback'){filmTime=c.time;filmElapsed=c.elapsed;$('filmHeading').textContent='FLASHBACK · '+(c.index<2?'ANTES DA GUERRA':c.index<6?'MADRUGADA DA INVASÃO':'A FAMÍLIA PRECISA PARTIR')}
+if(c.kind==='checkpoint'&&c.index===3)gateOpen=Math.min(1,c.time/4);
+const speaking=step.text&&c.time<Math.min(2.5,step.text.length/32);drawFace(activeFace,speaking?1+Math.floor(clock*10)%2:0);
+if(c.time>=(step.duration||4)&&tracksDone())nextScene();}
 function interact(){if(!started||paused||ended||inspecting||transitioning||$('infoModal').open)return;if(cinematic){nextScene();return}if(dialog){advance();return}const n=nearest();if(!n)return;
 switch(n.id){
+case 'rest':organizeRest();break;
+case 'message':sendMessage();break;
+case 'services':talk('Informações · Conversa opcional',['Atendimento e registro: procure a equipe na recepção. Aqui é possível pedir orientação sobre moradia, documentação e trabalho. Este é um abrigo temporário, não uma solução definitiva.'],null,'S');break;
+case 'waterpoint':talk('Água · Informação opcional',['Neste abrigo, a equipe informa os horários de distribuição e os pontos de água. Serviços disponíveis variam de um lugar para outro.'],null,'S');break;
+case 'activity':talk('Atividade educativa · Informação opcional',['Retomar os estudos também faz parte do recomeço. Esta atividade de acolhimento não substitui a matrícula na escola.'],null,'S');break;
 case 'lia':if(stage===0)meetFamily();else if(stage===1&&hasDocs)returnFamily();else talk('Lia · Sua mãe',[stage===1?'A pasta ficou na entrada da nossa casa, perto do varal.':'Estou pronta. Vamos levar água e seguir pelo vale.'],null,'L');break;
 case 'docs':collectFolder();break;
 case 'water':if(!water)playScene('water',[{face:'N',name:'Preparar a caminhada',text:'Água para o caminho.',duration:4}],()=>{water=true;route=true;updateJournal()});break;
@@ -105,25 +115,43 @@ function returnFamily(){playScene('return',[
 function confirmRoute(){if(stage>=3)return;playScene('route',[
 {face:'T',name:'Tomás · Militar',text:'A estrada principal está fechada. Sigam ao norte, pela ponte do vale.',duration:5}
 ],()=>{stage=3;route=true})}
-function changeArea(next){area=next;checked=false;player.x=55;player.y=206;family[0]={x:35,y:206};family[1]={x:18,y:206};trail=[];keys.clear();$('location').textContent='Fronteira · Posto do Vale';$('areaTag').innerHTML='A TRAVESSIA DO VALE<span>Uma passagem. Muitas incertezas.</span>';$('areaTag').hidden=false;updateJournal()}
+function journeyScene(){playScene('journey',[
+{face:'N',name:'Estrada do vale · Deixando Aurora',text:'A vila fica para trás. A família segue pelo caminho que ainda está aberto.',duration:8,tracks:[{actor:'noa',points:[[520,32]],speed:50},{actor:'lia',points:[[520,178],[520,44]],speed:48},{actor:'davi',points:[[538,178],[538,58]],speed:46}]}
+],()=>{journeyWalking=true;$('location').textContent='Estrada do Vale';$('areaTag').hidden=true;player.x=130;player.y=240;family[0]={x:106,y:247};family[1]={x:87,y:255};playScene('road',[
+{face:'N',name:'A caminhada',text:'O posto ainda está longe.',duration:8,tracks:[{actor:'noa',points:[[315,240]]},{actor:'lia',points:[[291,247]]},{actor:'davi',points:[[272,255]]}]},
+{face:'L',name:'Uma pausa para Davi',text:'Beba um pouco. Vamos continuar juntos.',duration:8},
+{face:'N',name:'A fronteira à vista',text:'Depois da curva, a família avista a ponte e o posto.',duration:8,tracks:[{actor:'noa',points:[[505,240]]},{actor:'lia',points:[[481,247]]},{actor:'davi',points:[[462,255]]}]}
+],()=>{journeyWalking=false;enterBorder()})})}
+function changeArea(){if(cinematic)return;journeyScene()}
+function enterBorder(){area=1;checked=false;gateOpen=0;player.x=55;player.y=206;family[0]={x:35,y:206};family[1]={x:18,y:206};trail=[];keys.clear();$('location').textContent='Fronteira · Posto do Vale';$('areaTag').innerHTML='A TRAVESSIA DO VALE<span>Uma passagem. Muitas incertezas.</span>';$('areaTag').hidden=false;updateJournal()}
 function checkpointScene(){playScene('checkpoint',[
-{face:'D',name:'Duarte · Controle de fronteira',text:'Parem. De onde vêm? Documentos, por favor.',duration:4},
-{face:'L',name:'Lia',text:'De Aurora. Somos três. Estamos fugindo dos combates.',duration:4},
-{face:'D',name:'Conferência dos documentos',text:'Lia, Noa e Davi. A família aguarda enquanto o militar confere a pasta.',duration:5},
-{face:'D',name:'Duarte',text:'Podem passar. Procurem a equipe de acolhimento.',duration:4}
-],()=>{checked=true;updateJournal()})}
+{face:'D',name:'Duarte · Controle de fronteira',text:'Aguardem junto à mesa. De onde vêm?',duration:6,tracks:[{actor:'noa',points:[[251,213]]},{actor:'lia',points:[[238,209]]},{actor:'davi',points:[[228,226]]}]},
+{face:'L',name:'Lia',text:'De Aurora. Somos três. Estamos fugindo dos combates.',duration:6},
+{face:'D',name:'Conferência dos documentos',text:'A família espera enquanto o militar confere e devolve a pasta.',duration:8},
+{face:'D',name:'A passagem é aberta',text:'Procurem a equipe de acolhimento à frente.',duration:6}
+],()=>{checked=true;gateOpen=1;updateJournal()})}
 function welcomeScene(){playScene('welcome',[
-{face:'S',name:'Sara · Acolhimento',text:'Há água e um lugar para descansar. Vamos orientar o pedido de proteção.',duration:5},
-{face:'L',name:'Lia',text:'Também precisamos encontrar minha irmã, Mara.',duration:4}
-],()=>{setMusic('hope');showTransition('ALGUNS DIAS DEPOIS','Abrigo temporário do Vale',beginDaily)})}
-function beginDaily(){dailyLife=true;$('areaTag').innerHTML='ABRIGO TEMPORÁRIO DO VALE<span>A vida precisa continuar.</span>';playScene('daily',[
-{face:'S',name:'Água e atendimento',text:'Primeiro, as necessidades de hoje.',duration:6},
-{face:'L',name:'Um lugar temporário',text:'A família organiza o pouco que conseguiu trazer.',duration:6},
-{face:'N',name:'Voltar a aprender',text:'Davi encontra outras crianças em uma atividade de acolhimento.',duration:7},
-{face:'N',name:'Reencontrar quem ficou longe',text:'No ponto de comunicação, Noa deixa uma mensagem para Mara.',duration:6},
-{face:'N',name:'Um primeiro passo',text:'A fotografia encontra um novo lugar junto da família.',duration:5}
-],completeJourney)}
-function completeJourney(){dailyLife=true;ended=true;family[0]={x:408,y:240};family[1]={x:425,y:239};player.x=443;player.y=240;$('ending').hidden=false;$('interaction').hidden=true;updateJournal()}
+{face:'S',name:'Sara · Acolhimento',text:'Venham. Há água e um espaço para descansar.',duration:6},
+{face:'S',name:'Um lugar para parar',text:'Sara acompanha a família até a área de descanso.',duration:10,tracks:[{actor:'sara',points:[[473,198],[420,226],[410,246]]},{actor:'noa',points:[[461,220],[437,244]]},{actor:'lia',points:[[440,222],[420,245]]},{actor:'davi',points:[[421,224],[407,252]]}]},
+{face:'L',name:'Depois da caminhada',text:'A bagagem vai para o chão. Pela primeira vez, a família pode descansar.',duration:8}
+],()=>{setMusic('hope');showTransition('ALGUNS DIAS DEPOIS','Um dia para recomeçar · Abrigo do Vale',beginDaily)})}
+function beginDaily(){area=2;dailyLife=true;restOrganized=false;messageSent=false;familyFollows=false;bagCarried=true;trail=[];player.x=240;player.y=224;family[0]={x:215,y:232};family[1]={x:194,y:241};$('location').textContent='Abrigo do Vale · Um dia para recomeçar';$('areaTag').innerHTML='UM DIA PARA RECOMEÇAR<span>Um abrigo temporário. Novos caminhos.</span>';updateJournal();}
+function organizeRest(){if(restOrganized)return;playScene('settle',[
+{face:'N',name:'Organizar o espaço da família',text:'Um lugar para os nossos pertences.',duration:8,tracks:[{actor:'noa',points:[[197,247],[178,279]]},{actor:'lia',points:[[215,245],[158,274]]},{actor:'davi',points:[[194,249],[139,281]]}]},
+{face:'L',name:'Lembranças de casa',text:'Lia arruma as coisas e apoia a fotografia junto da bagagem.',duration:8}
+],()=>{restOrganized=true;bagCarried=false;playScene('learning',[
+{face:'N',name:'Uma atividade com outras crianças',text:'Davi observa. Depois, decide se aproximar.',duration:12,tracks:[{actor:'davi',points:[[182,260],[235,222],[360,222],[429,196]]}]},
+{face:'L',name:'Informações para os próximos dias',text:'Lia procura informações sobre moradia e trabalho.',duration:9,tracks:[{actor:'lia',points:[[192,253],[252,220],[311,156]]}]}
+],()=>updateJournal())})}
+function sendMessage(){if(!restOrganized){$('gameStatus').textContent='Primeiro, leve a bagagem ao espaço da família, a sudoeste.';return}if(messageSent)return;playScene('message',[
+{face:'N',name:'Uma mensagem para Mara',text:'“Estamos no abrigo do Vale. Nós três. Quando puder, dê notícias.”',duration:9},
+{face:'N',name:'Manter o vínculo',text:'Mensagem enviada. A resposta ainda não chegou.',duration:8}
+],()=>{messageSent=true;updateJournal();playScene('closing',[
+{face:'N',name:'No fim daquele dia',text:'A família volta ao espaço que começou a organizar.',duration:12,tracks:[{actor:'noa',points:[[436,294],[436,232],[247,232],[195,274]]},{actor:'lia',points:[[311,220],[250,233],[156,277]]},{actor:'davi',points:[[429,222],[250,242],[141,283]]}]},
+{face:'N',name:'Um primeiro passo',text:'Ainda não era casa. Mas começavam a construir uma rotina.',duration:10}
+],completeJourney)})}
+function completeJourney(){ended=true;$('ending').hidden=false;$('interaction').hidden=true;updateJournal()}
+
 function showTransition(title,subtitle,done){cinematic=null;dialog=null;transitioning=true;transitionDone=done;keys.clear();$('dialogue').hidden=true;$('dockIdle').hidden=false;$('skipScene').hidden=true;$('scenePace').hidden=true;$('transitionTitle').textContent=title;$('transitionSubtitle').textContent=subtitle;$('presentCard').hidden=false;}
 function continueTransition(){if(!transitioning)return;const done=transitionDone;transitioning=false;transitionDone=null;$('presentCard').hidden=true;keys.clear();done?.();updateJournal();canvas.focus()}
 
@@ -207,41 +235,60 @@ r(149,205,86,6,'#937552');r(154,210,5,20,'#806346');r(224,210,5,20,'#806346');r(
 r(14,17,3,100,'#ffffff18');r(365,14,2,212,'#8d7e5c22');p.font='10px monospace';p.fillStyle='#776b54';p.fillText('SEIS ANOS DO DAVI · AURORA',46,246);
 }
 
-function canMove(x,y){if(x<12||x>628||y<30||y>374)return false;const blocks=area?borderBlocks:villageBlocks;for(const b of blocks)if(x+6>b.x&&x-6<b.x+b.w&&y>b.y&&y-7<b.y+b.h)return false;if(area===1&&!checked&&x>290)return false;if(area===1&&x>180&&x<235&&(y<172||y>237))return false;return true}
+function canMove(x,y){if(area===2){if(x<16||x>624||y<36||y>372)return false;return !shelterBlocks.some(b=>x+6>b.x&&x-6<b.x+b.w&&y>b.y&&y-7<b.y+b.h)}if(x<12||x>628||y<30||y>374)return false;const blocks=area?borderBlocks:villageBlocks;for(const b of blocks)if(x+6>b.x&&x-6<b.x+b.w&&y>b.y&&y-7<b.y+b.h)return false;if(area===1&&!checked&&x>290)return false;if(area===1&&x>180&&x<235&&(y<172||y>237))return false;return true}
 function update(dt){
 if(paused||$('infoModal').open||inspecting||document.hidden)return;if(transitioning)return;if(cinematic){updateScene(dt);return;}
 if(document.hidden)return;if(flashback){filmTime+=dt;filmElapsed+=dt;$('filmHeading').textContent='FLASHBACK · AURORA · '+(filmScene<2?'NA VÉSPERA':'MADRUGADA DA INVASÃO');if(sound&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches&&filmScene>=2&&Math.floor(filmTime*2)!==lastLetter){lastLetter=Math.floor(filmTime*2);if(lastLetter%5===0)impact()}}
 if(dialog){typing+=dt;const n=Math.min(dialog.text.length,Math.floor(typing*34));if(n!==visibleChars){visibleChars=n;$('dialogueText').textContent=dialog.text.slice(0,n);if(n<dialog.text.length&&/[^\s.,!?…]/.test(dialog.text[n-1]||''))tone(170+activeFace.charCodeAt(0)*2,.025,.008)}drawFace(activeFace,n<dialog.text.length&&/[\p{L}\p{N}]/u.test(dialog.text[Math.max(0,n-1)]||'')?1+Math.floor(clock*12)%2:0);return}
 if(!started||ended||flashback)return;let dx=0,dy=0;if(keys.has('w')||keys.has('ArrowUp'))dy=-1;if(keys.has('s')||keys.has('ArrowDown'))dy=1;if(keys.has('a')||keys.has('ArrowLeft'))dx=-1;if(keys.has('d')||keys.has('ArrowRight'))dx=1;if(dx&&dy)dy=0;let speed=80*dt;if(dx||dy){player.walk+=dt;if(dx)player.dir=dx<0?1:2;else player.dir=dy<0?3:0;if(canMove(player.x+dx*speed,player.y))player.x+=dx*speed;if(canMove(player.x,player.y+dy*speed))player.y+=dy*speed;}else player.walk=0;
-if(dx||dy){trail.push({x:player.x,y:player.y,dir:player.dir});if(trail.length>45)trail.shift();if(area&&returned){for(let i=0;i<2;i++){const pos=trail[Math.max(0,trail.length-1-(i+1)*14)];if(pos&&canMove(pos.x,pos.y))family[i]={...pos}}}}
-let n=nearest();$('interaction').hidden=!n;if(n)$('interaction').querySelector('span').textContent=n.id==='water'?'Encher a cantil':n.id==='docs'?'Recolher documentos':n.id==='exit'?'Seguir para a fronteira':'Conversar';if(!area&&stage===0&&Math.hypot(player.x-338,player.y-239)<46){meetFamily();return}if(!area&&stage===1&&hasDocs&&Math.hypot(player.x-338,player.y-239)<46){returnFamily();return}if(!area&&stage===2&&water&&Math.hypot(player.x-504,player.y-130)<40){confirmRoute();return}if(area&&!checked&&player.x>243){checkpointScene();return}if(area&&checked&&Math.hypot(player.x-473,player.y-165)<44){welcomeScene();return}if(!area&&stage===3&&player.x>490&&player.x<551&&player.y<38)changeArea(1);}
+if(dx||dy){trail.push({x:player.x,y:player.y,dir:player.dir});if(trail.length>45)trail.shift();if(area===1&&returned&&familyFollows){for(let i=0;i<2;i++){const pos=trail[Math.max(0,trail.length-1-(i+1)*14)];if(pos&&canMove(pos.x,pos.y))family[i]={...pos}}}}
+let n=nearest();$('interaction').hidden=!n;if(n)$('interaction').querySelector('span').textContent=n.id==='rest'?'Organizar os pertences':n.id==='message'?'Enviar mensagem':n.id==='water'?'Encher a cantil':n.id==='docs'?'Recolher documentos':n.id==='exit'?'Seguir para a fronteira':'Conversar';if(!area&&stage===0&&Math.hypot(player.x-338,player.y-239)<46){meetFamily();return}if(!area&&stage===1&&hasDocs&&Math.hypot(player.x-338,player.y-239)<46){returnFamily();return}if(!area&&stage===2&&water&&Math.hypot(player.x-504,player.y-130)<40){confirmRoute();return}if(area===1&&!checked&&player.x>243){checkpointScene();return}if(area===1&&checked&&Math.hypot(player.x-473,player.y-165)<44){welcomeScene();return}if(!area&&stage===3&&player.x>490&&player.x<551&&player.y<38)changeArea(1);}
 function drawStoryActions(){
 const c=cinematic,p=c?Math.min(1,c.time/(c.steps[c.index].duration||4)):0;
 if(c?.kind==='photo'){rect(0,0,W,H,'#1c2e25cc');ctx.drawImage($('photoThumb'),155,64,330,220);label('UMA LEMBRANÇA QUE VEIO CONOSCO',187,311,'#e5d8af',8)}
 if(c?.kind==='water'){rect(278,215,9,13,'#647969');rect(280,212,5,3,'#c8cbb0');rect(280,226-8*p,5,Math.ceil(8*p),'#96b8ab');for(let i=0;i<3;i++)rect(274+i*3,208+(c.time*18+i*6)%12,1,3,'#afccbb')}
 if(c?.kind==='checkpoint'){
 rect(259,180,38,12,'#7f7153');rect(262,192,3,10,'#6b6248');rect(290,192,3,10,'#6b6248');
-const x=c.index===0?250:c.index===1?250+25*p:c.index===2?275:275-25*p;
+const x=c.index<2?250:c.index===2?(p<.35?250+25*p/.35:p>.7?275-25*(p-.7)/.3:275):250;
 rect(x,179,12,9,'#bfa574');rect(x+2,177,9,8,'#e4dabc');rect(x+3,179,6,1,'#a9a48b');if(c.index===2){rect(279,173,3,4,'#d2b58b');label('LIA · NOA · DAVI',266,158,'#e5d8ae',6)}
-}
-if(dailyLife){
-// Mesmo abrigo, alguns dias depois: atividades em vez de uma explicação longa.
-rect(377,250,41,15,'#8d9f82');rect(379,251,10,10,'#d3d1b3');rect(420,250,40,15,'#84987d');rect(422,251,9,10,'#d3d1b3');crate(465,254);
-rect(496,215,42,20,'#5d745c');rect(493,213,48,3,'#a99e72');rect(498,235,3,12,'#8b805a');rect(531,235,3,12,'#8b805a');label('A B C',505,228,'#dfd9b2',7);
-for(const [i,x]of [480,500,522].entries())sprite(x,253+(i%2)*7,['#a68a66','#818f86','#ab7761'][i],'#554839',0,Math.sin(clock+i)>.8?clock:0,true);
-rect(543,182,24,37,'#a49976');rect(545,184,20,10,'#556e62');rect(548,198,10,3,'#d8cfad');rect(550,205,8,2,'#d8cfad');rect(549,176,2,9,'#5b6650');label('MENSAGENS',527,172,'#e7d8ac',6);
-if(c?.kind==='daily'){
- if(c.index===0){rect(435+12*p,219,4,6,'#b8c9b5');rect(436+12*p,218,3,2,'#d9dfc6')}
- if(c.index===1){rect(399+15*p,244,15,7,'#bda578');rect(400+15*p,242,12,3,'#dbcb9c')}
- if(c.index===2){sprite(543,251,'#7f8b72','#6c5340');label('ESCOLA / ACOLHIMENTO',469,281,'#dbd5b2',6)}
- if(c.index===3){rect(534,205,10,6,'#e4d5aa');rect(536,206,6,1,'#9c9f80');label('PARA MARA',516,238,'#e6dbb9',6)}
- if(c.index===4){rect(430,248,11,8,'#e9ddbb');rect(432,249,7,4,'#93a77f')}
- }
 }
 if(!area&&stage>=2){label('ROTA DO VALE ↑',462,83,'#e5d5a3',7);label('ESCOLA × INTERDITADA',66,182,'#dac38f',6)}
 }
 
-function draw(){if(flashback){drawFilm();return}ctx.clearRect(0,0,W,H);area?borderMap():village();if(!area&&stage===2&&!water){rect(291,218,7,10,'#6a7967');rect(293,216,3,3,'#b3b994');label('ÁGUA',260,251,'#e5dcba',6)}if(!area)sprite(353,252,'#8f6d5c','#514536',0,0,true);let characters=area?[borderNPC]:npcs;if(area&&returned)characters=[...characters,{...family[0],color:'#a86e57',hair:'#584337'},{...family[1],color:'#8f6d5c',hair:'#514536',child:true}];const chars=[...characters.map(n=>({...n,walk:n.walk||0,dir:n.dir||0})),{...player,color:'#bb9e63',hair:'#4a4236',isPlayer:true}].sort((a,b)=>a.y-b.y);for(const c of chars)sprite(c.x,c.y,c.color,c.hair,c.dir,c.walk,c.child);if(area){soldier(274,207);soldier(318,151);label('CONTROLE · AGUARDE',242,257);if(!checked){for(let x=291;x<357;x+=8)rect(x,177,6,5,x%16?'#c4ad76':'#5e634b');rect(292,179,3,53,'#626b52')}else label('PASSAGEM AUTORIZADA →',305,190,'#dfd1a4',6);label('ÁGUA / DESCANSO',390,263,'#d5d6b2',6)}else{soldier(536,137);label('ÁREA INTERDITADA',398,126,'#d6bb81',6)}drawStoryActions();const o=objective();if(!ended&&!cinematic&&!transitioning)marker(o.x,o.y);if(!area&&stage===3)label('↑ ROTA DO VALE',476,20,'#ead8a1',7);
+const shelterBlocks=[{x:60,y:50,w:142,h:86},{x:390,y:62,w:152,h:88},{x:282,y:75,w:68,h:50},{x:452,y:250,w:94,h:24}];
+function drawGate(){rect(294,232,8,12,'#606d51');ctx.save();ctx.translate(298,235);ctx.rotate(gateOpen*Math.PI/2);rect(-3,-72,6,72,'#c6b281');for(let i=0;i<7;i++)rect(-3,-70+i*10,6,5,'#687158');ctx.restore()}
+function drawJourney(){ground(true);rect(0,0,W,150,'#8d9f7d');rect(0,0,W,78,'#a3b49a');for(let i=0;i<10;i++){const x=i*74-28;rect(x,100+Math.sin(i)*8,85,45,'#788f6d');tree(x+23,149,false)}rect(0,152,W,70,'#8c926e');rect(0,215,W,60,'#b6a27e');rect(0,273,W,111,'#89936a');for(let i=0;i<18;i++)rect(i*37,238,16,1,'#c5b491');
+// A silhueta do posto fica ao longe; o corpo da cena acompanha a caminhada.
+rect(530,109,54,31,'#c2b995');rect(527,104,60,7,'#7f8e6a');rect(548,115,12,16,'#73846b');rect(573,137,3,39,'#6c7a59');label('POSTO DO VALE →',486,186,'#e6dbb6',8);label('ESTRADA DO VALE',25,44,'#e5dfc2',9);
+for(const c of [{...family[0],color:'#a86e57',hair:'#584337'},{...family[1],color:'#8f6d5c',hair:'#514536',child:true},{...player,color:'#bb9e63',hair:'#4a4236'}].sort((a,b)=>a.y-b.y))sprite(c.x,c.y,c.color,c.hair,c.dir||0,c.walk||0,c.child);
+if(cinematic?.kind==='road'&&cinematic.index===1){rect(family[1].x+5,family[1].y-17,4,7,'#a6c0af');rect(family[1].x+6,family[1].y-18,3,2,'#d3ddbf')}
+rect(0,0,W,16,'#23392a');rect(0,H-12,W,12,'#23392a')}
+function drawShelter(){
+rect(0,0,W,H,'#a0a782');for(let y=0;y<H;y+=12)for(let x=0;x<W;x+=12){if(hash(x,y)>.65)rect(x,y,5,2,'#abb18c')}
+rect(16,205,610,45,'#c5b18b');rect(227,126,46,220,'#c5b18b');rect(182,252,360,43,'#c5b18b');rect(409,147,35,62,'#c5b18b');
+for(const [x,y]of [[28,88],[573,84],[29,340],[595,330],[365,44],[564,181]])tree(x,y);
+fence(25,44,560);fence(25,364,560);house(60,50,142,86,'#7e8d70');label('ÁGUA / ATENDIMENTO',63,154,'#f0e3bf',7);
+// Um tanque, torneira e recipientes de água.
+rect(117,143,32,14,'#788b7d');rect(120,140,26,5,'#b3c6b0');rect(149,148,9,3,'#b9c4a2');rect(155,150,2,7,'#bfd8bb');rect(154,157,8,5,'#96aa92');label('HORÁRIOS NA RECEPÇÃO',65,181,'#e2dfbc',6);
+// Informação pública: serviços e mapa, sem obrigar o jogador a ler um diálogo.
+rect(282,75,68,50,'#697b5d');rect(279,72,74,4,'#a99c75');rect(286,126,3,16,'#827659');rect(344,126,3,16,'#827659');rect(288,81,26,36,'#ddd6b5');rect(318,81,26,36,'#cfdbc1');for(let i=0;i<5;i++){rect(291,86+i*5,19-i,1,'#819172');rect(322,86+i*5,17,1,'#819172')}label('MORADIA / TRABALHO',271,63,'#ece3bf',7);label('INFORMAÇÕES',287,149,'#f0e3c6',6);
+// Atividade para crianças, à frente da cobertura, com material e desenhos.
+rect(390,62,152,88,'#c7c5a2');for(let i=0;i<8;i++)rect(390+i*19,62,10,88,'#b9c1a0');rect(387,57,158,8,'#8f9d78');rect(389,149,4,17,'#6f805f');rect(538,149,4,17,'#6f805f');rect(411,119,68,29,'#667f66');label('A B C',424,135,'#e1ddbb',9);label('ATIVIDADE EDUCATIVA',389,47,'#ede4bf',7);
+for(const [i,x]of [399,453,479].entries()){sprite(x,191+(i%2)*9,['#a58a66','#819686','#ad7a65'][i],'#554839',0,0,true);rect(x-4,197+(i%2)*9,10,6,'#e8dfbc');rect(x-2,198+(i%2)*9,5,2,['#a9956a','#889f81','#b9876c'][i])}sprite(520,185,'#879978','#6b5543');
+// Espaço da família: abrigo simples, esteiras e a bagagem que ganha um lugar.
+rect(70,258,125,7,'#8e9b78');rect(69,258,3,78,'#6c7f5a');rect(193,258,3,78,'#6c7f5a');rect(76,285,45,30,'#8d9f82');rect(80,287,12,9,'#dbd9bd');rect(126,285,46,30,'#8b9d80');rect(130,287,12,9,'#dbd9bd');label('ESPAÇO DA FAMÍLIA',55,350,'#eee4c0',7);
+if(restOrganized){crate(179,301);rect(147,300,13,9,'#eee0bf');rect(150,302,7,4,'#92aa7d')}
+// Comunicação: mensagem com estado visível, sem encontro garantido.
+rect(452,250,94,24,'#a29068');rect(456,274,4,24,'#7a7354');rect(538,274,4,24,'#7a7354');rect(462,226,36,23,'#637e6f');rect(465,229,29,14,'#b4c9b0');rect(477,248,5,3,'#657561');rect(474,251,18,3,'#e1d6b0');rect(509,239,19,12,'#627b64');rect(523,224,2,18,'#52694e');label('CONTATO COM FAMILIARES',432,317,'#f0e4bc',7);if(messageSent)label('ENVIADA · AGUARDANDO RESPOSTA',405,334,'#f0e4bc',6);
+const people=[{...family[0],color:'#a86e57',hair:'#584337'},{...family[1],color:'#8f6d5c',hair:'#514536',child:true},{...player,color:'#bb9e63',hair:'#4a4236'}].sort((a,b)=>a.y-b.y);for(const c of people)sprite(c.x,c.y,c.color,c.hair,c.dir||0,c.walk||0,c.child);
+if(bagCarried){rect(player.x-12,player.y-12,9,10,'#a48e61');rect(player.x-10,player.y-14,5,3,'#c7b180')}
+if(cinematic?.kind==='settle'&&cinematic.index===1){const progress=Math.min(1,cinematic.time/5);rect(174-23*progress,283+17*progress,12,8,'#e5d6b2');rect(177-23*progress,285+17*progress,6,3,'#91aa7f')}
+if(cinematic?.kind==='message'){rect(505,264,18,7,'#e3d9b7');label(cinematic.index===0?'PARA MARA':'MENSAGEM ENVIADA',435,351,'#ece0ba',7)}
+if(cinematic?.kind==='closing'||ended){rect(0,0,W,H,'#bc8d4220');rect(137,280,13,9,'#e7d6b2');rect(139,282,9,4,'#8eaa7f')}
+if(!cinematic&&!transitioning&&!ended){const goal=objective();marker(goal.x,goal.y)}
+}
+
+function draw(){if(journeyWalking){drawJourney();return}if(area===2){drawShelter();return}if(flashback){drawFilm();return}ctx.clearRect(0,0,W,H);area?borderMap():village();if(!area&&stage===2&&!water){rect(291,218,7,10,'#6a7967');rect(293,216,3,3,'#b3b994');label('ÁGUA',260,251,'#e5dcba',6)}if(!area)sprite(353,252,'#8f6d5c','#514536',0,0,true);let characters=area?[borderNPC]:npcs;if(area&&returned)characters=[...characters,{...family[0],color:'#a86e57',hair:'#584337'},{...family[1],color:'#8f6d5c',hair:'#514536',child:true}];const chars=[...characters.map(n=>({...n,walk:n.walk||0,dir:n.dir||0})),{...player,color:'#bb9e63',hair:'#4a4236',isPlayer:true}].sort((a,b)=>a.y-b.y);for(const c of chars)sprite(c.x,c.y,c.color,c.hair,c.dir,c.walk,c.child);if(area){soldier(274,207);soldier(318,151);label('CONTROLE · AGUARDE',242,257);drawGate();if(checked)label('PASSAGEM AUTORIZADA →',305,190,'#dfd1a4',6);label('ÁGUA / DESCANSO',390,263,'#d5d6b2',6)}else{soldier(536,137);label('ÁREA INTERDITADA',398,126,'#d6bb81',6)}drawStoryActions();const o=objective();if(!ended&&!cinematic&&!transitioning)marker(o.x,o.y);if(!area&&stage===3)label('↑ ROTA DO VALE',476,20,'#ead8a1',7);
 // Poeira sutil levada pelo vento.
 for(let i=0;i<13;i++){let x=(hash(i,20)*W+clock*5)%W,y=(hash(i,21)*H+Math.sin(clock*.4+i)*6)%H;rect(x,y,1,1,'#e5d7aa55')}
 }
@@ -257,11 +304,11 @@ $('sound').onclick=()=>{if(sound){sound=false;music.pause();audioState()}else en
 $('musicVolume').oninput=e=>{clearInterval(musicFade);music.volume=Number(e.target.value)/100};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)music.pause();else if(sound&&!paused)music.play().catch(()=>{})});
 
-$('start').onclick=start;$('nextDialogue').onclick=advance;$('touchInteract').onclick=interact;$('pause').onclick=togglePause;$('resume').onclick=togglePause;$('restart').onclick=()=>{area=0;stage=0;cinematic=null;transitioning=false;transitionDone=null;dailyLife=false;$('presentCard').hidden=true;$('paused').hidden=true;water=false;route=false;bagScene='memories';checked=false;trail=[];family[0]={x:338,y:239};family[1]={x:350,y:250};hasDocs=false;returned=false;ended=false;paused=false;dialog=null;player.x=305;player.y=286;player.dir=0;keys.clear();$('ending').hidden=true;$('location').textContent='Vila de Aurora';$('areaTag').innerHTML='VILA DE AURORA<span>Um lugar que já foi lar.</span>';for(let i=0;i<4;i++)$('q'+i).querySelector('.step').textContent=String(i+1).padStart(2,'0');start()};
+$('start').onclick=start;$('nextDialogue').onclick=advance;$('touchInteract').onclick=interact;$('pause').onclick=togglePause;$('resume').onclick=togglePause;$('restart').onclick=()=>{area=0;stage=0;$('q3').querySelector('p').textContent='Cruze a fronteira, organize os pertences e contate Mara.';journeyWalking=false;gateOpen=0;restOrganized=false;messageSent=false;bagCarried=false;familyFollows=true;Object.assign(borderNPC,{x:473,y:165,walk:0});cinematic=null;transitioning=false;transitionDone=null;dailyLife=false;$('presentCard').hidden=true;$('paused').hidden=true;water=false;route=false;bagScene='memories';checked=false;trail=[];family[0]={x:338,y:239};family[1]={x:350,y:250};hasDocs=false;returned=false;ended=false;paused=false;dialog=null;player.x=305;player.y=286;player.dir=0;keys.clear();$('ending').hidden=true;$('location').textContent='Vila de Aurora';$('areaTag').innerHTML='VILA DE AURORA<span>Um lugar que já foi lar.</span>';for(let i=0;i<4;i++)$('q'+i).querySelector('.step').textContent=String(i+1).padStart(2,'0');start()};
 $('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('gameColumn').requestFullscreen()}catch{modal('Tela ampliada','<p>Seu navegador não oferece tela cheia aqui. Você pode usar o zoom do navegador ou jogar normalmente nesta janela.</p>')}};
 function modal(title,html){keys.clear();if(started&&!paused&&!ended&&!dialog)togglePause();$('modalTitle').textContent=title;$('modalContent').innerHTML=html;$('infoModal').showModal()}
 $('about').onclick=()=>modal('Pessoas, lugares e recomeços.','<p>Um pequeno jogo educacional de Geografia sobre <strong>guerra, deslocamento populacional, fronteiras e busca por proteção</strong>.</p><p>Aurora e seus personagens são fictícios. A história trata de experiências vividas por milhões de pessoas, sem representar um conflito específico.</p><p>Feito em HTML, CSS e JavaScript, com arte original desenhada em Canvas. Sem combate, pontuação ou quiz.</p>');
-$('help').onclick=()=>{const target=objective();const tips={lia:hasDocs?'Volte à praça com a pasta. A cena começa ao se aproximar da sua mãe.':'Aproxime-se de Lia, na praça, para começar a partida.',docs:'A pasta está no chão, diante da casa com varal, a sudoeste. Use E.',water:'Aproxime-se do poço pela parte de baixo e pressione E.',tomas:'Siga a estrada à direita da praça até o portão, a nordeste.',exit:'Suba pela passagem à direita de Tomás. A saída fica ao norte.',military:'Atravesse a ponte para leste. A abordagem começa ao se aproximar da barreira.',sara:'Continue a leste até Sara, de roupa clara, diante do posto.'};modal('Seu próximo passo','<p>'+tips[target.id]+'</p>')};
+$('help').onclick=()=>{const target=objective();const tips={rest:'O espaço da família fica no canto inferior esquerdo do pátio. Leve a bagagem até as esteiras e pressione E.',message:'O ponto de comunicação fica no canto inferior direito. Aproxime-se da mesa e pressione E.',lia:hasDocs?'Volte à praça com a pasta. A cena começa ao se aproximar da sua mãe.':'Aproxime-se de Lia, na praça, para começar a partida.',docs:'A pasta está no chão, diante da casa com varal, a sudoeste. Use E.',water:'Aproxime-se do poço pela parte de baixo e pressione E.',tomas:'Siga a estrada à direita da praça até o portão, a nordeste.',exit:'Suba pela passagem à direita de Tomás. A saída fica ao norte.',military:'Atravesse a ponte para leste. A abordagem começa ao se aproximar da barreira.',sara:'Continue a leste até Sara, de roupa clara, diante do posto.'};modal('Seu próximo passo','<p>'+tips[target.id]+'</p>')};
 for(const b of document.querySelectorAll('.close,.close-action'))b.onclick=()=>$('infoModal').close();
 const dirs={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'};for(const b of document.querySelectorAll('[data-dir]')){b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(dirs[b.dataset.dir])});for(const type of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(type,()=>keys.delete(dirs[b.dataset.dir]))}
 window.addEventListener('keydown',e=>{if($('infoModal').open||inspecting)return;const key=e.key.length===1?e.key.toLowerCase():e.key;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','e','w','a','s','d','Escape','Enter'].includes(key))e.preventDefault();if(key==='Escape'){togglePause();return}if(transitioning){if(key==='Enter'||key==='e'||key===' ')continueTransition();return}if(key==='e'||key==='Enter'||key===' '){if(!e.repeat){if(!started)start();else interact()}return}keys.add(key)});window.addEventListener('keyup',e=>keys.delete(e.key.length===1?e.key.toLowerCase():e.key));window.addEventListener('blur',()=>{keys.clear();if(started&&!paused&&!ended&&!dialog)togglePause()});document.addEventListener('visibilitychange',()=>{if(document.hidden)keys.clear()});

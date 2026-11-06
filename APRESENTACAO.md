@@ -16,7 +16,7 @@ O percurso foi feito para mostrar situações enquanto você explica, sem exigir
 
 ## Durante o cotidiano
 
-“Cruzar a fronteira não encerra todas as dificuldades. A família precisa de água, moradia, informação, escola e meios para retomar seus vínculos. Aqui mostramos um abrigo temporário; nem toda pessoa refugiada vive em abrigo ou campo.”
+“Aqui levamos os pertences até um espaço de descanso e tentamos retomar contato com uma familiar. Cruzar a fronteira não encerra todas as dificuldades. A família precisa de água, moradia, informação, escola e meios para retomar seus vínculos. Aqui mostramos um abrigo temporário; nem toda pessoa refugiada vive em abrigo ou campo.”
 
 ## Ao terminar
 
@@ -28,3 +28,7 @@ O percurso foi feito para mostrar situações enquanto você explica, sem exigir
 - As cenas avançam sozinhas. É possível pausá-las ou pulá-las.
 - “De volta ao presente” e “Alguns dias depois” aguardam seu clique em Continuar.
 - Carta, documentos, fotografia ampliada e conversa com Ivo são complementos opcionais.
+
+## Na parte jogável do abrigo
+
+Leve a bagagem até as esteiras no canto inferior esquerdo e pressione E. Depois das cenas de Davi e Lia, siga ao ponto de comunicação, no canto inferior direito, e envie a mensagem a Mara com E. Não há resposta imediata nem reencontro garantido. As placas de água, serviços e atividade educativa podem ser exploradas opcionalmente.
