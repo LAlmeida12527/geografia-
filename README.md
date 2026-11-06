@@ -6,14 +6,14 @@ Jogo curto de Geografia em **HTML, CSS e JavaScript**, pronto para GitHub Pages.
 
 O percurso principal prioriza **animações e ações**, com poucas legendas curtas. As cenas avançam automaticamente, sem exigir que o apresentador fique passando falas. A leitura aprofundada, os documentos e a conversa com o professor Ivo são opcionais.
 
-- Invasão em um flashback identificado, com tropas, moradores procurando abrigo e a saída da família.
+- Invasão em um flashback identificado de aproximadamente 86 segundos, com apresentação da família e planos mais longos, com tropas, moradores procurando abrigo e a saída da família.
 - Transição exclusiva “De volta ao presente”, com um botão Continuar. Nenhum diálogo aparece por cima dela.
 - Exploração para recolher a pasta e buscar água. A família e o militar iniciam suas cenas ao se aproximar.
 - Controle da fronteira animado: a pasta é entregue, conferida e devolvida; a barreira é liberada.
 - Sequência “Alguns dias depois”: água, organização de um espaço de descanso, atividade para Davi e tentativa de contato com Mara.
 - Falas e retratos em uma faixa abaixo da imagem; a caixa não cobre os personagens.
 
-Tempo estimado do percurso: **4–6 minutos**, dependendo da exploração e das pausas. As conversas opcionais podem alongar a experiência. Sem combate, pontuação ou sistemas de fome e dinheiro.
+Tempo estimado do percurso: **5–7 minutos**, dependendo da exploração e das pausas. As conversas opcionais podem alongar a experiência. Sem combate, pontuação ou sistemas de fome e dinheiro.
 
 ## Jogar
 
@@ -61,3 +61,5 @@ Os arquivos já estão no repositório `LAlmeida12527/geografia-`. Em outro repo
 Os testes verificam cenas automáticas e puláveis, pausa, transições sem sobreposição, alcance dos objetivos, pasta opcional, barreira e reinício. Usam DOM e Canvas simulados, sem substituir revisão visual e sonora no navegador.
 
 A chegada significa acolhimento inicial, não reconhecimento automático do pedido de refúgio. O abrigo temporário é uma situação específica da ficção; pessoas refugiadas também reconstroem suas vidas em bairros e cidades. O jogo não coleta dados. Recarregar a página reinicia a jornada.
+
+A encenação do flashback mantém a rua militar ao norte e as famílias ao sul das casas. É uma organização visual da ficção, sem afirmar que todas as fugas reais aconteçam desse modo. As cenas continuam automáticas, com pausa e avanço disponíveis.

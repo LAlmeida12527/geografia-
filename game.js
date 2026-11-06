@@ -67,10 +67,10 @@ function playScene(kind,steps,complete){
  keys.clear();player.walk=0;dialog=null;$('dialogue').hidden=false;$('interaction').hidden=true;$('dockIdle').hidden=true;$('nextDialogue').textContent='Próxima cena →';
  cinematic={kind,steps,index:0,time:0,elapsed:0,complete};$('skipScene').hidden=false;$('scenePace').hidden=false;showSceneStep();updateJournal();
 }
-function showSceneStep(){const step=cinematic.steps[cinematic.index];activeFace=step.face||'N';$('speaker').textContent=step.name||'';$('dialogueText').textContent=step.text||'';drawFace(activeFace,0);$('scenePace').textContent='CENA AUTOMÁTICA · '+(cinematic.index+1)+' / '+cinematic.steps.length+' · Esc pausa';if(cinematic.kind==='flashback'){filmScene=cinematic.index;filmTime=0;if(filmScene===2)impact()}}
+function showSceneStep(){const step=cinematic.steps[cinematic.index];activeFace=step.face||'N';$('speaker').textContent=step.name||'';$('dialogueText').textContent=step.text||'';drawFace(activeFace,0);$('scenePace').textContent=(cinematic.kind==='flashback'?'FLASHBACK · RITMO TRANQUILO':'CENA AUTOMÁTICA')+' · '+(cinematic.index+1)+' / '+cinematic.steps.length+' · Esc pausa';if(cinematic.kind==='flashback'){filmScene=cinematic.index;filmTime=0;if(filmScene===2)impact()}}
 function nextScene(){if(!cinematic||paused)return;const current=cinematic;current.index++;current.time=0;if(current.index<current.steps.length)showSceneStep();else finishScene()}
 function finishScene(){if(!cinematic)return;const done=cinematic.complete;cinematic=null;keys.clear();$('dialogue').hidden=true;$('dockIdle').hidden=false;$('skipScene').hidden=true;$('scenePace').hidden=true;done?.();updateJournal();canvas.focus()}
-function updateScene(dt){const c=cinematic;c.time+=dt;c.elapsed+=dt;const step=c.steps[c.index],p=Math.min(1,c.time/(step.duration||4));if(c.kind==='flashback'){filmTime=c.time;filmElapsed=c.elapsed;$('filmHeading').textContent='FLASHBACK · AURORA · '+(c.index<2?'NA VÉSPERA':'MADRUGADA DA INVASÃO')}
+function updateScene(dt){const c=cinematic;c.time+=dt;c.elapsed+=dt;const step=c.steps[c.index],p=Math.min(1,c.time/(step.duration||4));if(c.kind==='flashback'){filmTime=c.time;filmElapsed=c.elapsed;$('filmHeading').textContent='FLASHBACK · '+(c.index<2?'ANTES DA GUERRA':c.index<6?'MADRUGADA DA INVASÃO':'A FAMÍLIA PRECISA PARTIR')}
 if(c.kind==='checkpoint'){player.x=254;player.y=220;family[0]={x:245,y:202};family[1]={x:231,y:218};}
 if(c.kind==='welcome'){player.x=466;player.y=196;family[0]={x:443,y:191};family[1]={x:426,y:204};}
 if(c.kind==='daily'){if(c.index===4){player.x=443;player.y=240;family[0]={x:408,y:240};family[1]={x:425,y:239}}if(c.index===0){family[0]={x:440,y:220};family[1]={x:425+22*p,y:235}}if(c.index===1){player.x=426;player.y=238;family[0]={x:408,y:240};family[1]={x:425,y:239}}if(c.index===2){family[1]={x:450+58*p,y:245};}if(c.index===3){player.x=530;player.y=220;}}
@@ -132,35 +132,54 @@ const faces={N:['#4a4236','#bb9e63','#d4b28b'],L:['#584337','#a86e57','#d4ae88']
 function drawFace(id,mouth=0){const c=$('portraitCanvas'),p=c.getContext('2d');p.imageSmoothingEnabled=false;const [hair,coat,skin]=faces[id]||faces.N;const r=(x,y,w,h,col)=>{p.fillStyle=col;p.fillRect(x,y,w,h)};r(0,0,64,64,'#8a9772');r(3,3,58,58,'#c2c8a3');r(8,50,48,14,coat);r(17,44,30,17,coat);r(26,37,13,14,skin);r(18,13,29,29,'#574b38');r(20,13,25,29,skin);r(17,9,31,12,hair);r(15,16,8,id==='L'||id==='S'?31:15,hair);r(43,15,6,id==='L'||id==='S'?32:15,hair);r(22,20,18,3,'#e3bb90');r(19,28,3,7,skin);r(45,28,3,7,skin);const blink=Math.sin(clock*1.3)>.996;r(24,27,5,blink?1:4,'#e4dcc3');r(36,27,5,blink?1:4,'#e4dcc3');r(26,27,2,blink?1:4,'#3b493a');r(36,27,2,blink?1:4,'#3b493a');r(23,24,7,1,hair);r(35,24,7,1,hair);r(31,30,3,5,'#b58b69');r(29,38,9,mouth===2?4:mouth===1?2:1,'#6e4439');if(mouth===2)r(31,38,5,1,'#e2c8a5');if(id==='I'){r(22,26,9,1,'#514e45');r(34,26,9,1,'#514e45');r(30,28,5,1,'#514e45');r(28,36,11,2,hair)}if(id==='T'||id==='D'||id==='V'){r(15,9,35,9,coat);r(14,16,37,3,'#3e4b39');r(30,11,5,4,'#c3b681')}if(id==='N'){r(17,48,30,5,'#b87754');r(36,51,6,13,'#a2694b')}if(id==='S'){r(40,53,3,9,'#9f5e4b');r(37,56,9,3,'#9f5e4b')}}
 function soldier(x,y){sprite(x,y,'#667953','#474b3b');rect(x-8,y-30,17,6,'#55684d');rect(x-9,y-25,19,2,'#384d3a');rect(x-5,y-18,11,2,'#3d5140');line(x-8,y-14,x+7,y-6,'#343d33',3);rect(x+5,y-10,3,9,'#343d33')}
 function beginFilm(){filmElapsed=0;flashback=true;filmScene=0;filmTime=0;setMusic('aurora');$('filmHeading').hidden=false;playScene('flashback',[
-{face:'N',name:'Aurora · Na véspera',text:'Um dia comum, antes da guerra.',duration:4},
-{face:'L',name:'Lia',text:'Noa, traga seu irmão para dentro.',duration:4},
-{face:'N',name:'A invasão',text:'Motores. Depois, a primeira explosão.',duration:5},
-{face:'V',name:'Militar · Na rua',text:'Área interditada! Procurem abrigo!',duration:5},
-{face:'L',name:'Lia',text:'Longe da janela. Fiquem juntos!',duration:4},
-{face:'N',name:'A casa deixa de ser segura',text:'Os combates chegaram à nossa rua.',duration:4},
-{face:'L',name:'Lia',text:'Pela praça. Só o que conseguirmos carregar.',duration:5},
-{face:'N',name:'A partida',text:'Não era uma viagem. Era uma fuga.',duration:4}
+{face:'N',name:'Aurora · Antes da guerra',text:'Meu nome é Noa. Moro aqui com minha mãe, Lia, e meu irmão mais novo, Davi.',duration:10},
+{face:'N',name:'Naquela tarde',text:'Davi brincava na praça. Minha mãe recolhia as roupas. Nós ainda pensávamos no dia seguinte.',duration:10},
+{face:'N',name:'Horas depois · A invasão',text:'Na madrugada, veículos militares entraram pela estrada. As primeiras explosões vieram do norte.',duration:12},
+{face:'V',name:'Militar · Na estrada ocupada',text:'Rua interditada! Saiam da via e procurem abrigo!',duration:10},
+{face:'L',name:'Lia · Reunindo os filhos',text:'Noa, fique perto do Davi. Vamos esperar longe da rua.',duration:12},
+{face:'N',name:'Enquanto os combates continuavam',text:'As famílias se abrigaram atrás das casas. A escola fechou. Já não era seguro ficar.',duration:10},
+{face:'L',name:'Lia · A decisão de partir',text:'Há uma passagem pela praça. Vamos juntos. Só o que conseguirmos carregar.',duration:12},
+{face:'N',name:'Ao amanhecer',text:'Deixamos nossa casa para buscar proteção. A fronteira era o caminho que ainda estava aberto.',duration:10}
 ],endFilm)}
 function endFilm(){flashback=false;filmTime=0;$('filmHeading').hidden=true;$('areaTag').hidden=false;showTransition('DE VOLTA AO PRESENTE','Aurora · Na manhã seguinte',()=>updateJournal())}
 function impact(){if(!sound||!audio)return;const count=audio.sampleRate*.7,buffer=audio.createBuffer(1,count,audio.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<count;i++)data[i]=(Math.random()*2-1)*Math.exp(-i/(audio.sampleRate*.12))*.16;const src=audio.createBufferSource(),f=audio.createBiquadFilter();src.buffer=buffer;f.type='lowpass';f.frequency.value=220;src.connect(f);f.connect(audio.destination);src.start()}
-function drawFilm(){
-ctx.save();const intense=filmScene>=2,shake=intense&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?Math.sin(filmElapsed*22)*1.2:0;ctx.translate(shake,0);ground();
-house(67,64,130,99,'#806953',filmScene>=3);house(65,228,120,91,'#8b7355');house(390,242,139,100,'#6b7460',filmScene>=4);house(405,53,87,58,'#707959');well(255,188);tree(40,145);tree(362,84);lamp(375,221);fence(47,341,140);
-if(!intense){sprite(305,211,'#bb9e63','#4a4236');sprite(134,222,'#a86e57','#584337');sprite(326+Math.sin(filmTime)*8,206,'#8f6d5c','#514536',0,filmTime,true);sprite(227,178,'#7c8892','#c4c0a0');line(84,215,173,215,'#777758');rect(104,216,11,8,'#9c9b7d');label('UM DIA COMUM, ANTES DA GUERRA',193,67,'#e5dbb3',9)}else{
-rect(0,0,W,H,'#22364788');
-// Coluna militar atravessa a rua; silhuetas distintas, rodas e esteiras.
-for(let v=0;v<2;v++){const x=510-((filmElapsed*15+v*138)%550),y=173+v*30;rect(x,y,69,24,'#354236');rect(x+9,y-9,42,15,'#53634b');rect(x+37,y-15,21,7,'#69775b');rect(x+48,y-13,30,3,'#404c3c');rect(x+2,y+20,65,9,'#252f28');for(let w=0;w<5;w++)rect(x+7+w*12,y+22,7,6,'#58604b');rect(x+13,y-5,10,6,'#8e9c82')}
-for(let i=0;i<7;i++){const x=520-((filmElapsed*18+i*44)%500),y=155+(i%3)*26;soldier(x,y);if(Math.sin(filmElapsed*5+i)>.85){rect(x-19,y-12,9,2,'#dcba77');rect(x-23,y-14,4,5,'#f0d79a')}}
-// Civis correm para uma passagem, sem corpos ou violência gráfica.
-for(let i=0;i<4;i++){const x=60+((filmElapsed*28+i*49)%175);sprite(x,216+i*5,['#8e7965','#7c8892','#a58a63','#8c6f63'][i],'#554839',2,filmElapsed)}
-for(const [x,y]of [[165,91],[433,270]]){for(let i=0;i<9;i++){const rise=(filmElapsed*16+i*11)%80;rect(x+i%3*8-rise*.15,y-rise,17+rise*.2,12,'#6b695b99')}for(let i=0;i<6;i++){const z=Math.sin(filmElapsed*7+i)*3;rect(x+i*4,y-9-z,5,14+z,i%2?'#c99150':'#9f6541')}}
-// Impactos, poeira e marcas no chão: a vila se transforma durante a invasão.
-for(let i=0;i<3;i++){const x=[187,371,77][i],y=[160,224,190][i],phase=(filmElapsed*.45+i*.3)%1;rect(x-9,y,26,6,'#565a48');for(let j=0;j<9;j++){const d=phase*23;rect(x+Math.cos(j)*d,y+Math.sin(j)*d/2,4,3,phase<.2?'#cdb28b':'#a3917566')}}
-for(let i=0;i<8;i++)rect(165+i*7,161+(i%3)*3,6,4,'#887a60');
-const fx=filmScene>=6?130+Math.min(120,filmTime*14):145;sprite(fx,246,'#a86e57','#584337',2,filmScene>=6?filmTime:0);sprite(fx+21,246,'#bb9e63','#4a4236',2,filmScene>=6?filmTime:0);sprite(fx-12,253,'#8f6d5c','#514536',2,filmScene>=6?filmTime:0,true);
-label(filmScene>=6?'A FAMÍLIA PROCURA UMA SAÍDA':'TROPAS ENTRAM EM AURORA',187,67,'#e5c398',9);
+// Zonas separadas: a rua militar fica ao norte; civis e família ficam ao sul das casas.
+function filmBlocking(){
+ const invasion=filmScene>=2,escape=filmScene>=6;
+ const advance=Math.min(230,Math.max(0,filmElapsed-20)*5);
+ const familyX=escape?145+Math.min(148,filmTime*12):145;
+ return {invasion,escape,army:invasion?Array.from({length:6},(_,i)=>({x:600-advance-i*37,y:164+(i%2)*23})):[],civilians:invasion?Array.from({length:4},(_,i)=>({x:escape?40+i*39+Math.min(115,filmTime*9):40+i*39,y:349+(i%2)*8})):[],family:[{x:familyX,y:330},{x:familyX+23,y:331},{x:familyX-13,y:340}]};
 }
-ctx.restore();rect(0,0,W,28,'#17231f');rect(0,H-15,W,15,'#17231f');
+function drawFilm(){
+ const scene=filmBlocking(),intense=scene.invasion;
+ ctx.save();const shake=intense&&filmScene===2&&filmTime<2&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?Math.sin(filmTime*18)*.7:0;ctx.translate(shake,0);ground();
+ house(67,64,130,99,'#806953',filmScene>=3);house(65,228,120,91,'#8b7355');house(390,242,139,100,'#6b7460');house(405,53,87,58,'#707959');well(255,188);tree(40,145);tree(362,84);lamp(375,221);
+ if(!intense){
+ line(84,215,173,215,'#777758');rect(104,216,11,8,'#9c9b7d');rect(124,216,9,8,'#b7a887');
+ sprite(305,231,'#bb9e63','#4a4236');sprite(134,222,'#a86e57','#584337');sprite(332+Math.sin(filmTime*.6)*6,235,'#8f6d5c','#514536',0,filmTime*.3,true);sprite(227,178,'#7c8892','#c4c0a0');
+ label('NOA',292,250,'#eee1bd',6);label('LIA',121,240,'#eee1bd',6);label('DAVI',325,254,'#eee1bd',6);label('NOSSA CASA',92,352,'#eee1bd',8);label('AURORA · UMA VIDA ANTES DA FUGA',181,54,'#e5dbb3',8);
+ }else{
+ rect(0,0,W,H,'#22364777');
+ // Os veículos entram pela estrada ao norte, sem atravessar o trajeto dos civis.
+ const travel=Math.min(230,Math.max(0,filmElapsed-20)*5);
+ for(let v=0;v<2;v++){const x=584-travel+v*88,y=165;rect(x,y,69,24,'#354236');rect(x+9,y-9,42,15,'#53634b');rect(x+37,y-15,21,7,'#69775b');rect(x+48,y-13,30,3,'#404c3c');rect(x+2,y+20,65,9,'#252f28');for(let w=0;w<5;w++)rect(x+7+w*12,y+22,7,6,'#58604b');rect(x+13,y-5,10,6,'#8e9c82')}
+ for(const [i,m]of scene.army.entries()){
+ soldier(m.x,m.y);
+ // Disparos breves orientados para a extremidade norte/leste, sem mirar o corredor de fuga.
+ if(filmScene<6&&i%2===0&&Math.sin(filmElapsed*3+i)>.94){line(m.x+7,m.y-16,m.x+17,m.y-23,'#323d32',3);rect(m.x+17,m.y-25,5,3,'#dfba79');line(m.x+23,m.y-27,Math.min(638,m.x+45),m.y-39,'#c4a16a')}
+ }
+ // Poeira e incêndio ficam na parte ocupada da vila, afastados do caminho da família.
+ for(const[x,y]of [[167,95],[444,85]]){for(let i=0;i<8;i++){const rise=(filmElapsed*8+i*11)%65;rect(x+i%3*7-rise*.1,y-rise,14+rise*.17,10,'#6b695b99')}if(filmScene>=3)for(let i=0;i<5;i++){const z=Math.sin(filmElapsed*4+i)*2;rect(x+i*3,y-6-z,4,10+z,i%2?'#c99150':'#9f6541')}}
+ for(let i=0;i<8;i++)rect(165+i*7,161+(i%3)*3,6,4,'#887a60');
+ // Uma parede e as casas distinguem o abrigo e a praça da rua ocupada.
+ rect(20,273,35,11,'#969377');rect(188,273,167,11,'#969377');rect(20,271,35,3,'#b3ae8c');rect(188,271,167,3,'#b3ae8c');for(let x=192;x<353;x+=16)rect(x,279,9,1,'#777d62');
+ label('RUA OCUPADA',392,135,'#e3c295',7);label(scene.escape?'SAÍDA PELA PRAÇA →':'ABRIGO DAS FAMÍLIAS',370,355,'#e3d3a8',7);
+ for(const[i,c]of scene.civilians.entries())sprite(c.x,c.y,['#8e7965','#7c8892','#a58a63','#8c6f63'][i],'#554839',2,scene.escape?filmTime*.6:0);
+ const [lia,noa,davi]=scene.family;sprite(lia.x,lia.y,'#a86e57','#584337',2,scene.escape?filmTime*.6:0);sprite(noa.x,noa.y,'#bb9e63','#4a4236',2,scene.escape?filmTime*.6:0);sprite(davi.x,davi.y,'#8f6d5c','#514536',2,scene.escape?filmTime*.6:0,true);
+ }
+ ctx.restore();rect(0,0,W,28,'#17231f');rect(0,H-15,W,15,'#17231f');
+ // Um intervalo escuro curto entre os planos evita a troca brusca de contexto.
+ if(filmTime<.6){const alpha=Math.max(0,.65*(1-filmTime/.6));rect(0,28,W,H-43,'rgba(23,35,31,'+alpha+')')}
 }
 
 function openBag(done){if(cinematic||transitioning)return;if(!(hasDocs||returned)){done?.();return}keys.clear();inspecting=true;inspectionDone=done||null;$('bagDialog').showModal();$('bagContext').textContent=bagScene==='checkpoint'?'CONTROLE DE FRONTEIRA · A pasta sobre a mesa de inspeção':'MEMÓRIAS DE CASA · Abra um dos objetos sobre a pasta';$('closeBag').textContent=bagScene==='checkpoint'?'Entregar documentos ao militar →':'Guardar a pasta →';showItem('overview')}
