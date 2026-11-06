@@ -8,7 +8,7 @@ O percurso foi feito para mostrar situações enquanto você explica, sem exigir
 
 ## Durante a preparação e a caminhada
 
-“Noa busca a pasta e água. A família só pode carregar uma parte da vida que tinha. Como a estrada principal foi fechada, também precisa mudar de rota.”
+“Noa busca a pasta e água. A viagem combina caminhada e ônibus civil, e o trecho final até a fronteira é feito a pé. A família só pode carregar uma parte da vida que tinha. Como a estrada principal foi fechada, também precisa mudar de rota.”
 
 ## Durante o controle da fronteira
 
