@@ -14,7 +14,7 @@ As referências estão disponíveis dentro do jogo e no arquivo de créditos. Co
 
 1. Mostre a invasão e os retratos com a boca acompanhando o texto.
 2. Recolha a pasta e abra cada objeto.
-3. Explique a diferença entre deslocamento interno e travessia internacional.
+3. Encha a cantil no poço e descubra a rota com Ivo. Explique a diferença entre deslocamento interno e travessia internacional.
 4. Mostre o controle militar e a liberação após a conversa.
 5. Conclua com o acolhimento e abra “Relatos reais e créditos”.
 

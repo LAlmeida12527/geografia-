@@ -22,8 +22,8 @@ O pedido de proteção não depende de vencer o jogo ou possuir uma lembrança f
 ## Arte, música e som
 
 - Cenários, retratos animados e fotografia: arte original em Canvas 2D.
-- **Aurora** — composição instrumental original para a vila e as memórias, 48 segundos em loop, piano sintetizado e fundo sustentado.
-- **Vale** — composição instrumental original para o encerramento, 48 segundos em loop.
+- **Aurora** — composição instrumental original para a vila e as memórias, 48 segundos em loop, piano sintetizado e fundo sustentado, gerados no navegador por assets/audio/music.js.
+- **Vale** — composição instrumental original para o encerramento, 48 segundos em loop, gerados localmente no navegador.
 - Digitação e impacto distante: síntese local por Web Audio; sem vozes gravadas.
 
 As gravações pesquisadas (“Sadness”, “At the end of hope” e “Forget Me Not”, no OpenGameArt) NÃO estão incluídas. O ambiente não conseguiu baixar os arquivos; foram usadas composições originais para entregar áudio local funcional. Nenhuma gravação desses autores foi copiada.
